@@ -2,5 +2,5 @@
   "view" : "recent-items",
   "descending" : "true",
   "limit" : 50,
-  "newRows" : true
+  "type" : "newRows"
 }
