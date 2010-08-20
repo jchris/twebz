@@ -8,8 +8,10 @@ var tweetstream = require('tweetstream'),
 var config = JSON.parse(fs.readFileSync(path.join(__dirname, 'config.json')));
 
 
-var stream = tweetstream.createTweetStream({track:config.track,
+var searches = tweetstream.createTweetStream({track:config.track,
                                             username:config.username,
+                                            password:config.password});
+var timeline = tweetstream.createTweetStream({username:config.username,
                                             password:config.password});
 
 // automatically friend anyone who mentions the term...
@@ -20,7 +22,7 @@ function addFriend(stream, user) {
   });
 };
 
-stream.addListener("tweet", function (tweet) {
+function saveTweetToCouch(tweet) {
   tweet._id = tweet.id.toString();
   if (tweet.text && tweet.user) {
     sys.puts(sys.inspect({
@@ -36,4 +38,7 @@ stream.addListener("tweet", function (tweet) {
       if (resp && resp.statusCode !== 201) sys.puts(sys.inspect(resp), sys.puts(body));
       else {sys.puts(body)};
   });
-});
+};
+
+searches.addListener("tweet", saveTweetToCouch);
+timeline.addListener("tweet", saveTweetToCouch);

@@ -1,11 +1,15 @@
 function(data) {
   // $.log(data)
-  var p;
+  var v, user;
   return {
     items : data.rows.map(function(r) {
-      p = (r.value && r.value.profile) || {};
-      p.message = r.value && r.value.message;
-      return p;
+      v = r.value; user = v.user;
+      return {
+        image_url : user.profile_image_url,
+        name : user.screen_name,
+        nickname : user.name,
+        message : v.text
+      };
     })
   }
 };
