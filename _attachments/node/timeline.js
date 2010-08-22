@@ -7,6 +7,10 @@ var tweetstream = require('tweetstream'),
     sys = require('sys'),
     couchdb = require("couchdb");
 
+function log(e) {
+  sys.puts(sys.inspect(e));
+};
+
 var config = JSON.parse(fs.readFileSync(path.join(__dirname, 'config.json')));
 
 
@@ -83,8 +87,10 @@ function workFromChanges() {
   var stream = db.changesStream({
     filter : "tweb/tweb"
   });
-  stream.addListener("data", function(d) {
-    sys.puts(sys.inspect(d));
+  stream.addListener("data", function(change) {
+    db.getDoc(change.id, function(e, doc) {
+      log(doc)
+    })
   });
 };
 
