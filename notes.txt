@@ -1,0 +1,46 @@
+status loop
+
+save doc with schema that can be displayed:
+
+twitter name && couchdb user name.
+
+if twitter name == configured twitter acct && username == current logged in user, then we push it.
+  want to take care that someone else can't force a tweet by writing docs to your local db, then they get configured to push to twitter when it comes back online.
+  validate that only owners may write docs with needstweet = true?
+
+additional schema
+
+tweb : 
+  state : sent | unsent | sending
+  state_at : time()
+  acct : {
+    service : twitter,
+    name : jchris
+  },
+  signature : hmac(),
+
+
+install:
+  create tweb database
+  create private-jchris database
+  link twitter account(s) to couchdb account
+  option to send each tweet as any linked account
+  
+
+docids need to be deterministic across nodes or else we get dup tweets
+
+if tweb initiated, docid is couchdb id
+if else, docid is twitter id.
+
+if tweb initiated remotely, and pushed through twitter before replicated
+
+  
+twitter
+chweet
+tweb
+chwitter
+chweet
+chweb
+status couch
+stouch
+cotweet
