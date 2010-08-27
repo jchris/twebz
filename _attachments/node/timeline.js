@@ -42,44 +42,6 @@ function saveTweetToCouch(tweet) {
 searches.addListener("tweet", saveTweetToCouch);
 timeline.addListener("tweet", saveTweetToCouch);
 
-// connect to the couchdb changes feed to find work to do
-// 
-// function listenForWork () {
-//   var end = '\n';
-//   var buffer, stream = new events.EventEmitter();
-//   stream.addListener("data", function (chunk) {
-//     var blob;
-//     buffer += chunk.toString('utf8');
-//     // sys.puts(buffer);
-//     if (buffer.indexOf(end) !== -1) {
-//       while (buffer.indexOf(end) !== -1) {
-//         blob = buffer.slice(0, buffer.indexOf(end));
-//         buffer = buffer.slice(buffer.indexOf(end) + end.length);
-//         if (blob.length > 0) {
-//           stream.emit('line', blob);
-//         }
-//       }
-//     }
-//   });
-//   stream.write = function (chunk) {stream.emit('data', chunk)};
-//   stream.end = function () {stream.emit("end")};
-//   stream.addListener("line", function(line) {
-//    sys.puts(line);
-//   })
-//   function start() {
-//     request({
-//       uri : config.couch + "/_changes?feed=continuous&heartbeat=true&filter=tweb/tweb",
-//       headers:{'content-type':'application/json'},
-//       responseBodyStream : stream
-//     }, function() {
-//       // if we disconnected, retry
-//       // todo keep track of high-seq
-//       setTimeout(start, 100);
-//     });    
-//   };
-//   start();
-// }
-// listenForWork()
 
 function workFromChanges() {
   var client = couchdb.createClient(5984, 'localhost'),
