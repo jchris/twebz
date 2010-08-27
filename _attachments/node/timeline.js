@@ -35,7 +35,6 @@ function saveTweetToCouch(tweet) {
 searches.addListener("tweet", saveTweetToCouch);
 timeline.addListener("tweet", saveTweetToCouch);
 
-
 function workFromChanges() {
   var client = couchdb.createClient(5984, 'localhost'),
     db = client.db('tweb'); // todo use config

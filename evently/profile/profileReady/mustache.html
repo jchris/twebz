@@ -1,14 +1,13 @@
-<p>Most applications will customize this template (<tt>ddoc.evently.profile.profileReady.mustache</tt>) for user input.</p>
-
 <div class="avatar">
   {{#gravatar_url}}<img src="{{gravatar_url}}"/>{{/gravatar_url}}
   <div class="name">
-    {{name}}
+    {{nickname}}
   </div>
 </div>
 
 <form>
-  <label>New message from {{nickname}}: <input type="text" name="message" size=60 value=""></label>
+  <label>Update status: <input type="text" name="message" size=80 value=""></label>
 </form>
-
+<p>Status will be saved to CouchDB, then pushed to Twitter. If Twitter is down, 
+  replicas will be able to read the status without going through Twitter.</p>
 <div style="clear:left;"></div>
