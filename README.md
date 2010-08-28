@@ -1,4 +1,4 @@
-# Tweb - Decentralizing Twitter, One Tweet at a Time
+# Twebz - Decentralizing Twitter, One Tweet at a Time
 
 This app basically doesn't work yet. But it will. And it will be awesome!
 

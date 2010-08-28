@@ -22,10 +22,10 @@ var searches = tweetstream.createTweetStream({track:config.track,
 var timeline = tweetstream.createTweetStream({username:config.username,
                                             password:config.password});
 
-var twebdb = cc(config.couch);
+var twebzdb = cc(config.couch);
 
 function saveTweetToCouch(tweet) {
-  twebdb.save(tweet, function(er, doc) {
+  twebzdb.save(tweet, function(er, doc) {
     if (er) {
       log(er);
     }
@@ -37,9 +37,9 @@ timeline.addListener("tweet", saveTweetToCouch);
 
 function workFromChanges() {
   var client = couchdb.createClient(5984, 'localhost'),
-    db = client.db('tweb'); // todo use config
+    db = client.db('twebz'); // todo use config
   var stream = db.changesStream({
-    filter : "tweb/tweb"
+    filter : "twebz/twebz"
   });
   stream.addListener("data", function(change) {
     db.getDoc(change.id, function(e, doc) {

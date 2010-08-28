@@ -1,6 +1,6 @@
 function() {
   var widget = $(this), app = $$(widget).app;
-  app.db.openDoc("tweb-config", {
+  app.db.openDoc("twebz-config", {
     success : function(doc) {
       if (doc.twitter_keypair) {
         widget.trigger("keyring");
