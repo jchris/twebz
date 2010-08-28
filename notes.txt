@@ -21,10 +21,26 @@ tweb :
 
 
 install:
-  create tweb database
-  create private-jchris database
+/*  create tweb database*/
+  setup screen
+    prompt for user to setup twitter app keypair in node/config.json
+    prompt to create tweb-private-username database
+      ensure user is admin
+        grant access to private-db to node script
+        (user: tweb, password: uuid)
+    save uuid in private db
+    link twitter accounts and save creds in private-db
+    prompt to run tweb-node script
+      (can we use externals API to provide uuid to node script?)
+    
   link twitter account(s) to couchdb account
+    store twitter creds in private db
+    store shared secret in private db
   option to send each tweet as any linked account
+
+required for tweb to post to twitter:
+  twitter creds for tacct x are in private db for cacct
+  pretweet has tacct and cacct + content signed with shared secret hmac
   
 
 docids need to be deterministic across nodes or else we get dup tweets
