@@ -1,0 +1,16 @@
+<h3>Create App User</h3>
+<p>Twebz requires a dedicate user for the application, which will have access 
+  to the twebz configuration database.</p>
+<p>To proceed with setup, copy the Twebz configuration code below, then click 
+  "setup". Setup will create a user called {{app_user}} and grant it access to 
+  a configuration database called {{config_db}}.
+</p>
+<p>You will be prompted to save the {{app_user}} user's password to a 
+  configuration file. This permits the Node.js compontent of Twebz to access 
+  configuration data allowing it to communicate with Twitter.</p>
+<p>Once this step is complete you will be prompted to acquire Twitter authentication keys,
+  which takes just a moment on Twitter's API page.</p>
+<form><p>Copy this passcode and paste it into the file <tt>node/config.json</tt>: 
+  <strong class="password">{{password}}</strong></p>
+   <p>Once the passcode is in place, click this button to continue: 
+     <input type="submit" value="Setup Twebz User"></p></form>

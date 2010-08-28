@@ -23,7 +23,13 @@ twebz :
 install:
 /*  create twebz database*/
   setup screen
-    prompt for user to setup twitter app keypair in node/config.json
+  site setup:
+    create twebz user
+    put twebz user password in config.json
+    create twebz-config database only twebz user can read
+    prompt for user to setup twitter app keypair
+    
+  user setup:
     prompt to create twebz-private-username database
       ensure user is admin
         grant access to private-db to node script
@@ -35,6 +41,8 @@ install:
     
   link twitter account(s) to couchdb account
     store twitter creds in private db
+      oauth_token
+      oauth_token_secret
     store shared secret in private db
   option to send each tweet as any linked account
 

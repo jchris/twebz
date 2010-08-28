@@ -6,7 +6,8 @@ var tweetstream = require('tweetstream'),
     request = require('request'),
     sys = require('sys'),
     couchdb = require("couchdb"),
-    cc = require("couch-client")
+    cc = require("couch-client"),
+    oauth = require("oauth")
     ;
 
 function log(e) {
