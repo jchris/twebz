@@ -42,8 +42,10 @@ install:
     
   link twitter account(s) to couchdb account
     user stores a start-link-account document to the twebz db
+      in state "request"
     user subscribes to _changes on the user db
-    twebz-bot gets a request-token and makes it available in the user-db
+    twebz-bot gets a request-token and makes it available in the user-db,
+      sets the link_account doc state to "working"
     twebz-bot subscribes to the user-db _changes until oath complete (w/ 20 minute timeout)
     user loads the token, marks it as used, and uses it to redirect to the twitter authorize page
     user authorizes and is redirected back to the app
