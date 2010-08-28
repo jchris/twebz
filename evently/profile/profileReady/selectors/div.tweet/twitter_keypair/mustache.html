@@ -1,11 +1,10 @@
 <h4>OAuth Credentials</h4>
-<p>Before you can send tweets from Twebz, there some configuration that needs to 
-  happen.</p>
-<p>Twebz uses a Node.js program to interact with the Twitter API. The README 
-  file describes how to install and run the Node.js Twebz program. You may
-  have even started running it already. If so, it can pull realtime search results into
-  the Twebz database already, but it needs more help to pull in your personalized 
-  timeline, or to let you post to Twitter.</p>
-<p>The first step is to setup an application key for your installation of Twebz.
-  You'll only need to do this once, no matter how many users you allow to sign up 
-  for your copy of Twebz. </p>
+<p>Before you can send tweets from Twebz, you need to set soe configuration 
+  data. Visit <a href="http://dev.twitter.com/apps" target="_new">the Twitter
+    dev site</a> to get the info for this form.</p>
+<form>
+  <label>Consumer key: <input type="text" size=25 name="consumer_key"></label><br/>
+  <label>Consumer secret: <input type="text" size=40 name="consumer_secret"></label>
+  <br/><input type="submit" value="Save Twitter Config">
+</form>
+

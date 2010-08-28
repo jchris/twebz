@@ -9,6 +9,10 @@ h1 {
   margin-top:0;
 }
 
+.error {
+  color:#D00;
+}
+
 #account {
   float:right;
 }

@@ -31,7 +31,8 @@ install:
     
   user setup:
     prompt to create twebz-private-username database
-      ensure user is admin
+      ensure user is admin 
+      (this could be skipped by giving the twebz bot admin creds)
         grant access to private-db to node script
         (user: twebz, password: uuid)
     save uuid in private db
@@ -40,6 +41,17 @@ install:
       (can we use externals API to provide uuid to node script?)
     
   link twitter account(s) to couchdb account
+    user stores a start-link-account document to the twebz db
+    user subscribes to _changes on the user db
+    twebz-bot gets a request-token and makes it available in the user-db
+    twebz-bot subscribes to the user-db _changes until oath complete (w/ 20 minute timeout)
+    user loads the token, marks it as used, and uses it to redirect to the twitter authorize page
+    user authorizes and is redirected back to the app
+    app updates user-db request token document with 'go'
+    user subscribes to user-db _changes
+    twebz-bot uses request-token document to get access token, updates token doc with access token, user_id, and screen_name
+    user sees _change apply, and sends app to active state.
+  
     store twitter creds in private db
       oauth_token
       oauth_token_secret

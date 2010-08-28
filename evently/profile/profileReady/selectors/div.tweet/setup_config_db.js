@@ -2,27 +2,13 @@ function() {
   var widget = $(this)
     , app = $$(widget).app
     , twebz = app.require("lib/twebz").init(app.db.name)
+    , security = app.require("lib/security")
     ;
   var cdb = $.couch.db(twebz.config_db);
   function setAccess() {
-    cdb.getDbProperty("_security", {
-      success : function(secObj) {
-        secObj.readers = secObj.readers || {
-          names : [],
-          roles : []
-        };
-        if (secObj.readers.names.indexOf(twebz.app_user) == -1) {
-          secObj.readers.names.push(twebz.app_user);
-          cdb.setDbProperty("_security", secObj, {
-            success : function() {
-              widget.trigger("twitter_keypair");
-            }
-          });
-        } else {
-          widget.trigger("twitter_keypair");
-        }
-      }
-    });    
+    security.addReaders(cdb, [twebz.app_user], function() {
+      widget.trigger("ensure_twitter_keys");
+    });
   };
   cdb.create({
     success : setAccess,

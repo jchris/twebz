@@ -6,10 +6,9 @@ function() {
   // ensure the twebz user exists and has a private database for config
   $.couch.session({
     success : function(session) {
+      $$(widget).session = session;
       $.couch.db(session.info.authentication_db).openDoc("org.couchdb.user:"+twebz.app_user, {
         success : function() {
-          // if the user exists, we assume it's been setup proper
-          // check to see if the config database exists
           widget.trigger("setup_config_db");
         },
         error : function() {

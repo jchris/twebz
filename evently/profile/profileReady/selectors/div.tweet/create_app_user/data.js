@@ -3,8 +3,6 @@ function() {
     , app = $$(widget).app
     , twebz = app.require("lib/twebz").init(app.db.name)
     ;
-  twebz.password = $.couch.newUUID().split("").sort(function() {
-    return Math.random() - Math.random();
-  }).join("");
+  twebz.password = twebz.randomToken();
   return twebz;
 };
