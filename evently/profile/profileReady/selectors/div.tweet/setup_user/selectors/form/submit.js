@@ -10,18 +10,28 @@ function() {
   $.couch.db(session.info.authentication_db).openDoc("org.couchdb.user:"+username, {
     success : function() {
       var udb = $.couch.db(twebz.user_db(username));
+      function setSecret() {
+        udb.saveDoc({
+          _id : "twebz-secret",
+          token : twebz.randomToken()
+        }, {
+          success : function() {
+            widget.trigger("link_twitter_account");
+          },
+          error : function() {
+            widget.trigger("link_twitter_account");
+          }
+        });        
+      };
+      
       function setAccess() {
         security.addReaders(udb, [username, twebz.app_user], function() {
           udb.saveDoc({
-            _id : "twebz-secret",
-            token : twebz.randomToken()
+            _id : "_design/twebz-private",
+            views : app.ddoc["private"].views
           }, {
-            success : function() {
-              widget.trigger("link_twitter_account");
-            },
-            error : function() {
-              widget.trigger("link_twitter_account");
-            }
+            success : setSecret,
+            error : setSecret
           });
         });
       };

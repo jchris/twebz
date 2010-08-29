@@ -69,6 +69,7 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
   }
 
   function requestToken(doc) {
+    log("requestToken!")
     twitter_oauth.getOAuthRequestToken(
       function(er, 
           oauth_token, oauth_token_secret, 
@@ -105,7 +106,7 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
           since : 0
         });
     stream.addListener("data", function(change) {
-      log("change")
+      log("change "+udb.name)
       log(change)
     });
   }

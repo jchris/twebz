@@ -8,7 +8,7 @@ function() {
     , request_link = function() {
         // view to make sure there isn't already an in progress request
         app.view("account-links",{
-          key : ["request", username],
+          keys : [["request", username], ["launched", username]],
           success : function(resp) {
             if (resp.rows.length == 0) {
               app.db.saveDoc({
@@ -39,6 +39,7 @@ function() {
       $.log(resp)
       if (!link_requested) {
         request_link();
+        link_requested = true;
       }
       for (var i=0; i < resp.results.length; i++) {
         handleRequestToken(resp.results[i].doc);
