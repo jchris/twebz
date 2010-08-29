@@ -20,18 +20,5 @@ function() {
         }
       });
     }
-  })
-  // 
-  // app.db.openDoc("twebz-config", {
-  //   success : function(doc) {
-  //     if (doc.twebz) {
-  //       widget.trigger("keyring");
-  //     } else {
-  //       widget.trigger("twitter_keypair");
-  //     }
-  //   },
-  //   error : function() {
-  //     widget.trigger("twitter_keypair");
-  //   }
-  // });
+  });
 };
