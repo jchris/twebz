@@ -23,12 +23,14 @@ twebz :
 install:
 /*  create twebz database*/
   setup screen
-  site setup:
-    create twebz user
-    put twebz user password in config.json
-    create twebz-config database only twebz user can read
-    prompt for user to setup twitter app keypair
-    
+first check to see if site needs setup!
+    site setup:
+      create twebz user
+      put twebz user password in config.json
+      create twebz-config database only twebz user can read
+      prompt for user to setup twitter app keypair
+
+now check to see if user needs setup:
   user setup:
     prompt to create twebz-private-username database
       ensure user is admin 
@@ -38,8 +40,7 @@ install:
     save uuid in private db
     link twitter accounts and save creds in private-db
     prompt to run twebz-node script
-      (can we use externals API to provide uuid to node script?)
-    
+      (can we use externals API to provide uuid to node script?)    
   link twitter account(s) to couchdb account
     user stores a start-link-account document to the twebz db
       in state "request"
@@ -50,16 +51,18 @@ install:
     user loads the token, marks it as used, and uses it to redirect to the twitter authorize page
     user authorizes and is redirected back to the app
     app updates user-db request token document with 'go'
-    
     user subscribes to user-db _changes
     twebz-bot uses request-token document to get access token, updates token doc with access token, user_id, and screen_name
-    user sees _change apply, and sends app to active state.
-  
-    store twitter creds in private db
-      oauth_token
-      oauth_token_secret
-    store shared secret in private db
+
+
+
+active state!
+  ability to link more states
+  ability for admin to setup new users
+  ability for user to request new setups.
   option to send each tweet as any linked account
+
+
 
 required for twebz to post to twitter:
   twitter creds for tacct x are in private db for cacct
