@@ -5,6 +5,7 @@ function() {
     , username = $$("#account").userCtx.name
     , udb = $.couch.db(twebz.user_db(username))
     , link_requested = false
+    , oauth_redirected = false
     , request_link = function() {
         // view to make sure there isn't already an in progress request
         app.view("account-links",{
@@ -24,12 +25,14 @@ function() {
         });
       }
     ;
+  
   function handleRequestToken(doc) {
-    if (doc.type == "request_token" && doc.state == "new") {
-      var callbackURL = document.location.href.split("/");
-      callbackURL.pop();
-      callbackURL = callbackURL.join('/');
-      $.log(callbackURL);
+    if (!oauth_redirected && doc.type == "request_token" && doc.state == "new") {
+      var oauth_url = "https://api.twitter.com/oauth/authorize?oauth_token="
+        +doc.oauth_token;
+      // instead show a link and a form
+      oauth_redirected = true;
+      document.location = oauth_url;
     }
   }
   

@@ -69,33 +69,51 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
   }
 
   function requestToken(doc) {
-    log("requestToken!")
-    twitter_oauth.getOAuthRequestToken(
-      function(er, 
-          oauth_token, oauth_token_secret, 
-          oauth_authorize_url, params) {
-        if (er) {
-          doc.twebz.state = "error";
-          doc.twebz.error = er;
-          db.saveDoc(doc)
+    var udb = client.db(twebz.user_db(doc.twebz.couch_user));
+    udb.view("twebz-private","oauth-tokens",{
+      key : ["request_token", "new"]
+    }, function(er, resp) {
+      if (er) {
+        doc.twebz.state = "error";
+        doc.twebz.error = er;
+        db.saveDoc(doc);
+      } else {
+        if (resp.rows.length > 0) {
+          // we already have a valid request token, do nothing
+          log("no need to requestToken");
         } else {
-          // we have a request token, save it to the user-db
-          var udb = client.db(twebz.user_db(doc.twebz.couch_user));
-          udb.saveDoc({
-            type : "request_token",
-            state : "new",
-            oauth_token_secret : oauth_token_secret,
-            oauth_token : oauth_token,
-            oauth_authorize_url : oauth_authorize_url,
-            params : params
-          }, function(er, resp) {
-            if (!er) {
-              doc.twebz.state = "launched";
-              db.saveDoc(doc);              
-            }
-          });
+          log("requestToken!");
+          twitter_oauth.getOAuthRequestToken(function(er, 
+                oauth_token, oauth_token_secret, 
+                oauth_authorize_url, params) {
+              if (er) {
+                doc.twebz.state = "error";
+                doc.twebz.error = er;
+                db.saveDoc(doc);
+              } else {
+                // we have a request token, save it to the user-db
+                udb.saveDoc({
+                  type : "request_token",
+                  state : "new",
+                  oauth_token_secret : oauth_token_secret,
+                  oauth_token : oauth_token,
+                  oauth_authorize_url : oauth_authorize_url,
+                  params : params
+                }, function(er, resp) {
+                  if (er) {
+                    doc.twebz.state = "error";
+                    doc.twebz.error = er;
+                    db.saveDoc(doc);
+                  } else {
+                    doc.twebz.state = "launched";
+                    db.saveDoc(doc);
+                  }
+                });
+              }
+            });
         }
-    })
+      }
+    });
   };
 
   function requestTokenVerified(doc) {
