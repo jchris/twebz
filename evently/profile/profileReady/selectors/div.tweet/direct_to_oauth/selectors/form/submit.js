@@ -11,6 +11,7 @@ function(e) {
   doc.pin = pin;
   function handleAccessToken(doc) {
     if (doc.state == "has_access") {
+      $.log("has_access", doc);
       return true;
     }
   }

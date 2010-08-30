@@ -115,6 +115,22 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
     });
   };
 
+  function accessToken(udb, doc) {
+    twitter_oauth.getOAuthAccessToken(doc.oauth_token, doc.oauth_token_secret,
+      doc.pin, function(er, oauth_access_token, oauth_access_token_secret, extra) {
+        if (er) {
+          doc.state = "error";
+          doc.error = er;
+        } else {
+          doc.state = "has_access";
+          doc.oauth_access_token = oauth_access_token;
+          doc.oauth_access_token_secret = oauth_access_token_secret;
+          doc.access_params = extra;
+        }
+        udb.saveDoc(doc);
+      });
+  }
+
   function requestTokenVerified(doc) {
     // hang on udb changes waiting for the request_token response to be saved
     var udb = client.db(twebz.user_db(doc.twebz.couch_user))
@@ -123,10 +139,11 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
           since : 0
         });
     stream.addListener("data", function(change) {
-      var doc = chnage.doc;
+      var doc = change.doc;
       if (doc.type == "request_token" && doc.state == "has_pin" && doc.pin) {
-        log("got a PIN we can use "+pin);
+        log("got a PIN we can use "+doc.pin);
         // disconnect from changes
+        accessToken(udb, doc)
       }
     });
   }
