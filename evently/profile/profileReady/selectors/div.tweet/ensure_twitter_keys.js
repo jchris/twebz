@@ -8,7 +8,7 @@ function() {
   // if keys are set, setup current user
   cdb.openDoc("twitter-app-keys", {
     success : function() {
-      widget.trigger("setup_user");
+      widget.trigger("app_setup_complete");
     },
     error : function() {
       widget.trigger("twitter_keypair");

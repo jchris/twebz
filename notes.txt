@@ -30,6 +30,14 @@ first check to see if site needs setup!
       create twebz-config database only twebz user can read
       prompt for user to setup twitter app keypair
 
+if user is setup
+  main-page (if admin, link to pending users)
+else
+  if user is admin
+    pending users
+  else
+    wait for admin
+
 now check to see if user needs setup:
   user setup:
     prompt to create twebz-private-username database

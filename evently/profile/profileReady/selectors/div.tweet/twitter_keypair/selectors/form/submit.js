@@ -8,7 +8,7 @@ function() {
   f._id = "twitter-app-keys";
   cdb.saveDoc(f, {
     success : function() {
-      widget.parents("div.tweet").trigger("setup_user")
+      widget.trigger("app_setup_complete")
     }
   })
   return false;
