@@ -50,6 +50,8 @@ now check to see if user needs setup:
     link twitter accounts and save creds in private-db
     prompt to run twebz-node script
       (can we use externals API to provide uuid to node script?)    
+
+
   link twitter account(s) to couchdb account
     user stores a start-link-account document to the twebz db
       in state "request"

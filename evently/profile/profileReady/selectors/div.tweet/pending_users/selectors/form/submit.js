@@ -1,5 +1,4 @@
 function() {
-  // check to see that the user exists
   var widget = $(this)
   , username = $("[name=username]", widget).val()
   , app = $$(widget).app
