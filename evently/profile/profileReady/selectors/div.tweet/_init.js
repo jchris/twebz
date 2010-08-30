@@ -6,7 +6,7 @@ function() {
   app.db.openDoc("twebz-status",{
     success : function(doc) {
       if (doc.state == "setup-complete") {
-        widget.trigger("setup_user");
+        widget.trigger("user_init");
       } else {
         widget.trigger("setup_app");
       }

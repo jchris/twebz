@@ -1,0 +1,20 @@
+<h4>Pending users</h4>
+<p>Each Twebz user needs to be created by an admin. Once a user is created,
+  they will be able to manage multiple Twitter accounts with Twebz. The CouchDB 
+  user name has nothing to do with their Twitter user name. The user will log
+  into CouchDB as the CouchDB user, and then CouchDB will delegate connecting to 
+  Twitter to send and retreive tweets.</p>
+  <ul>
+    {{#users}}
+      <li><form>{{name}}
+        <input type="hidden" name="username" value="{{name}}">
+        <input type="submit" value="Setup">
+      </form>
+      </li>
+    {{/users}}
+  </ul>
+
+<p>This step can only be completed by an admin. Clicking "setup" will create a 
+  database that only the user, and the Twebz application can access. This will
+  store private information used for communicating with Twitter. Once this step
+  is complete, the user can continue by linking Twitter accounts to Twebz.</p>

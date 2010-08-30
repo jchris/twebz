@@ -7,17 +7,32 @@ function() {
   , security = app.require("lib/security")
   , info = $$("#account").info
   , udb = $.couch.db(twebz.user_db(username))
+  , docid = twebz.user_setup_docid(username)
   ;
+  function setupComplete() {
+    app.db.openDoc(docid, {
+      success : function(doc) {
+        doc.state = "setup-complete";
+        app.db.saveDoc(doc, {
+          success : function() {
+            widget.trigger("user_init");
+          }
+        });
+      }
+    });
+  };
   function setSecret() {
     udb.saveDoc({
       _id : "twebz-secret",
       token : twebz.randomToken()
     }, {
-      success : function() {
-        widget.trigger("link_twitter_account");
-      },
-      error : function() {
-        widget.trigger("link_twitter_account");
+      success : setupComplete,
+      error : function(code, error, reason) {
+        if (error == "conflict") {
+          setupComplete();
+        } else {
+          alert(er.reason);
+        }
       }
     });
   };

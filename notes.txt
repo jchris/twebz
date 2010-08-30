@@ -33,6 +33,7 @@ first check to see if site needs setup!
 if user is setup
   main-page (if admin, link to pending users)
 else
+  add-to-list
   if user is admin
     pending users
   else
