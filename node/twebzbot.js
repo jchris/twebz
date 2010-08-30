@@ -84,33 +84,32 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
         } else {
           log("requestToken!");
           twitter_oauth.getOAuthRequestToken(function(er, 
-                oauth_token, oauth_token_secret, 
-                oauth_authorize_url, params) {
-              if (er) {
-                doc.twebz.state = "error";
-                doc.twebz.error = er;
-                db.saveDoc(doc);
-              } else {
-                // we have a request token, save it to the user-db
-                udb.saveDoc({
-                  type : "request_token",
-                  state : "new",
-                  oauth_token_secret : oauth_token_secret,
-                  oauth_token : oauth_token,
-                  oauth_authorize_url : oauth_authorize_url,
-                  params : params
-                }, function(er, resp) {
-                  if (er) {
-                    doc.twebz.state = "error";
-                    doc.twebz.error = er;
-                    db.saveDoc(doc);
-                  } else {
-                    doc.twebz.state = "launched";
-                    db.saveDoc(doc);
-                  }
-                });
-              }
-            });
+                oauth_token, oauth_token_secret, params) {
+            if (er) {
+              doc.twebz.state = "error";
+              doc.twebz.error = er;
+              db.saveDoc(doc);
+            } else {
+              // we have a request token, save it to the user-db
+              udb.saveDoc({
+                type : "request_token",
+                state : "new",
+                created_at : new Date(),
+                oauth_token_secret : oauth_token_secret,
+                oauth_token : oauth_token,
+                params : params
+              }, function(er, resp) {
+                if (er) {
+                  doc.twebz.state = "error";
+                  doc.twebz.error = er;
+                  db.saveDoc(doc);
+                } else {
+                  doc.twebz.state = "launched";
+                  db.saveDoc(doc);
+                }
+              });
+            }
+          });
         }
       }
     });
@@ -124,8 +123,11 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
           since : 0
         });
     stream.addListener("data", function(change) {
-      log("change "+udb.name)
-      log(change)
+      var doc = chnage.doc;
+      if (doc.type == "request_token" && doc.state == "has_pin" && doc.pin) {
+        log("got a PIN we can use "+pin);
+        // disconnect from changes
+      }
     });
   }
 

@@ -46,10 +46,11 @@ install:
     user subscribes to _changes on the user db
     twebz-bot gets a request-token and makes it available in the user-db,
       sets the link_account doc state to "working"
-    twebz-bot subscribes to the user-db _changes until oath complete (w/ 20 minute timeout)
+    twebz-bot subscribes to the user-db _changes until oath complete (w timeout)
     user loads the token, marks it as used, and uses it to redirect to the twitter authorize page
     user authorizes and is redirected back to the app
     app updates user-db request token document with 'go'
+    
     user subscribes to user-db _changes
     twebz-bot uses request-token document to get access token, updates token doc with access token, user_id, and screen_name
     user sees _change apply, and sends app to active state.

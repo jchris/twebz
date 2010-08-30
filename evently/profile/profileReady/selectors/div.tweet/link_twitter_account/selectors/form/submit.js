@@ -32,20 +32,22 @@ function() {
       var oauth_url = "https://api.twitter.com/oauth/authorize?oauth_token="
         + doc.oauth_token;
       oauth_redirected = true;
-      widget.trigger("direct_to_oauth",[oauth_url]);
+      widget.trigger("direct_to_oauth",[doc, oauth_url]);
+      return true;
     }
   }
 
   if (!$$(widget).changes) {
     $$(widget).changes = udb.changes("0", {include_docs : true});
     $$(widget).changes.onChange(function(resp) {
-      $.log(resp)
       if (!link_requested) {
         request_link();
         link_requested = true;
       }
       for (var i=0; i < resp.results.length; i++) {
-        handleRequestToken(resp.results[i].doc);
+        if (handleRequestToken(resp.results[i].doc)) {
+          $$(widget).changes.stop();
+        }
       };
     });
   }
