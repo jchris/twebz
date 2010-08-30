@@ -6,36 +6,36 @@ function() {
     , udb = $.couch.db(twebz.user_db(username))
     , link_requested = false
     , oauth_redirected = false
-    , request_link = function() {
-        // view to make sure there isn't already an in progress request
-        app.view("account-links",{
-          keys : [["request", username], ["launched", username]],
-          success : function(resp) {
-            if (resp.rows.length == 0) {
-              app.db.saveDoc({
-                twebz : {
-                  type : "link_account",
-                  service : "twitter",
-                  couch_user : username,
-                  state : "request"
-                }
-              });
-            }
-          }
-        });
-      }
     ;
-  
+
+  function request_link() {
+    // view to make sure there isn't already an in progress request
+    app.view("account-links",{
+      keys : [["request", username], ["launched", username]],
+      success : function(resp) {
+        if (resp.rows.length == 0) {
+          app.db.saveDoc({
+            twebz : {
+              type : "link_account",
+              service : "twitter",
+              couch_user : username,
+              state : "request"
+            }
+          });
+        }
+      }
+    });
+  }
+
   function handleRequestToken(doc) {
     if (!oauth_redirected && doc.type == "request_token" && doc.state == "new") {
       var oauth_url = "https://api.twitter.com/oauth/authorize?oauth_token="
-        +doc.oauth_token;
-      // instead show a link and a form
+        + doc.oauth_token;
       oauth_redirected = true;
-      document.location = oauth_url;
+      widget.trigger("direct_to_oauth",[oauth_url]);
     }
   }
-  
+
   if (!$$(widget).changes) {
     $$(widget).changes = udb.changes("0", {include_docs : true});
     $$(widget).changes.onChange(function(resp) {
