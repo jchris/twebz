@@ -11,7 +11,10 @@ function(e) {
   doc.pin = pin;
   function handleAccessToken(doc) {
     if (doc.state == "has_access") {
-      $.log("has_access", doc);
+      setTimeout(function() {
+        // todo fix this
+        widget.trigger("_init");  
+      }, 500);
       return true;
     }
   }

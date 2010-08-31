@@ -62,6 +62,8 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
       case 'launched':
         requestTokenVerified(doc);
         break;
+      case 'complete':
+        break;
       default:
         log("linkAccount unknown state");
         log(doc);
@@ -115,7 +117,7 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
     });
   };
 
-  function accessToken(udb, doc) {
+  function accessToken(udb, doc, rdoc) {
     twitter_oauth.getOAuthAccessToken(doc.oauth_token, doc.oauth_token_secret,
       doc.pin, function(er, oauth_access_token, oauth_access_token_secret, extra) {
         if (er) {
@@ -127,7 +129,15 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
           doc.oauth_access_token_secret = oauth_access_token_secret;
           doc.access_params = extra;
         }
-        udb.saveDoc(doc);
+        udb.saveDoc(doc, function(er) {
+          if (er) {
+            rdoc.twebz.state = "error";
+            rdoc.twebz.error = er;
+          } else {
+            rdoc.twebz.state = "complete";
+          }
+          db.saveDoc(rdoc);
+        });
       });
   }
 
@@ -139,11 +149,11 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
           since : 0
         });
     stream.addListener("data", function(change) {
-      var doc = change.doc;
-      if (doc.type == "request_token" && doc.state == "has_pin" && doc.pin) {
-        log("got a PIN we can use "+doc.pin);
+      var cdoc = change.doc;
+      if (cdoc.type == "request_token" && cdoc.state == "has_pin" && cdoc.pin) {
+        log("got a PIN we can use "+cdoc.pin);
         // disconnect from changes
-        accessToken(udb, doc)
+        accessToken(udb, cdoc, doc)
       }
     });
   }
