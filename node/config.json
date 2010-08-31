@@ -1,3 +1,4 @@
 {
-  "passcode" : "REPLACE WITH PASSCODE AS PROVIDED BY Twebz IN YOUR BROWSER"
+  "passcode" : "REPLACE WITH PASSCODE AS PROVIDED BY Twebz IN YOUR BROWSER",
+  "db" : "http://localhost:5984/twebz"
 }
