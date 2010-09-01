@@ -41,6 +41,7 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
   function ok(er, doc, couch) {
     couch = couch || db; // default to db from closure
     if (er) {
+      log(['error', doc._id, er]);
       doc.twebz = doc.twebz || {};
       doc.twebz.state = "error";
       doc.twebz.error = er;
@@ -83,21 +84,28 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
   function getProfileInfo(doc) {
     if (doc.twebz.couch_user && doc.twebz.twitter_user && 
       doc.twebz.twitter_user.user_id) {
-      twitterConnection(doc.twebz.couch_user, 
-        doc.twebz.twitter_user.user_id, function(tc) {
-          tc.user({
-            user_id : doc.twebz.twitter_user.user_id
-          }, function(er, profile) {
-            log(profile)
-            // profile._id = "com.twitter.user:" + doc.twebz.twitter_user.user_id;
-            // db.saveDoc(profile, function(er, resp) {
-            //   if (ok(er, doc)) {
-            //     doc.twebz.state = "complete";
-            //     db.saveDoc(doc);
-            //   }
-            // });
+      var profile_id = twebz.profile_docid(doc.twebz.twitter_user.user_id);
+      db.getDoc(profile_id, function(er, profile_doc) {
+        if (er && er.error == "not_found") {
+          profile_doc = {_id : profile_id};
+        }
+        twitterConnection(doc.twebz.couch_user, 
+          doc.twebz.twitter_user.user_id, function(tc) {
+            tc.user({
+              user_id : doc.twebz.twitter_user.user_id
+            }, function(er, profile) {
+              delete profile.status;
+              profile._id = profile_doc._id;
+              profile._rev = profile_doc._rev;
+              db.saveDoc(profile, function(er, resp) {
+                if (ok(er, doc)) {
+                  doc.twebz.state = "complete";
+                  db.saveDoc(doc);
+                }
+              });
+            });
           });
-        });
+      });
     }
   }
 

@@ -17,12 +17,21 @@ TweasyClient.prototype.request = function(url, params /*, method, cb */) {
     cb = arguments[2];
     method = "GET";
   }
+  function tweasycb(er, data, resp) {
+    if (!er) {
+      try {
+        data = JSON.parse(data);
+      } catch(e) {}
+    }
+    cb(er, data, resp);
+  };
   if (method == "GET") {
     url = url + '?' + querystring.stringify(params);
-    this.oauth.get(url, this.creds.oauth_access_token, this.creds.oauth_access_token_secret, cb);
+    this.oauth.get(url, this.creds.oauth_access_token, 
+      this.creds.oauth_access_token_secret, tweasycb);
   } else if (method == "POST") {
-    this.oauth.post(url, this.creds.oauth_access_token, this.creds.oauth_access_token_secret, 
-      params, cb);
+    this.oauth.post(url, this.creds.oauth_access_token, 
+      this.creds.oauth_access_token_secret, params, tweasycb);
   }
 }
 
