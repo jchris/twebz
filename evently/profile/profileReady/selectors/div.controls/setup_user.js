@@ -25,7 +25,7 @@ function() {
   app.db.openDoc(userDocid, {
     success : function(doc) {
       if (doc.state == "setup-complete") {
-        widget.trigger("user_home");
+        widget.trigger("tweet");
       } else {
         requestUserSetup(doc);      
       }
