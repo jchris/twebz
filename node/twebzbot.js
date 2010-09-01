@@ -68,29 +68,38 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
     }
   };
 
-  function twitterConnection(couch_user, cb) {
+  function twitterConnection(couch_user, user_id, cb) {
     // load user creds
-    var udb = client.db(twebz.user_db(doc.twebz.couch_user))
+    var udb = client.db(twebz.user_db(couch_user))
       ;
-    
+    udb.view("twebz-private", "twitter-accts", {
+      key : parseInt(user_id)
+    }, function(er, resp) {
+      var tc = tweasy.init(twitter_oauth, resp.rows[0].value);
+      cb(tc);
+    });
   }
 
   function getProfileInfo(doc) {
-    if (doc.twebz.twitter_user && doc.twebz.twitter_user.user_id) {
-      var tc = tweasy.createClient()
-        , profile = tc.user({
-          user_id : doc.twebz.twitter_user.user_id
+    if (doc.twebz.couch_user && doc.twebz.twitter_user && 
+      doc.twebz.twitter_user.user_id) {
+      twitterConnection(doc.twebz.couch_user, 
+        doc.twebz.twitter_user.user_id, function(tc) {
+          tc.user({
+            user_id : doc.twebz.twitter_user.user_id
+          }, function(er, profile) {
+            log(profile)
+            // profile._id = "com.twitter.user:" + doc.twebz.twitter_user.user_id;
+            // db.saveDoc(profile, function(er, resp) {
+            //   if (ok(er, doc)) {
+            //     doc.twebz.state = "complete";
+            //     db.saveDoc(doc);
+            //   }
+            // });
+          });
         });
-      profile._id = "com.twitter.user:" + doc.twebz.twitter_user.user_id;
-      db.saveDoc(profile, function(er, resp) {
-        if (ok(er, doc)) {
-          doc.twebz.state = "complete";
-          db.saveDoc(doc);
-        }
-      });
     }
   }
-  
 
   function linkAccount(doc) {
     log("linkAccount state: "+doc.twebz.state);
@@ -107,9 +116,11 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
       case 'complete':
         break;
       case 'error':
+        doc.twebz.error.id = doc._id;
         log(doc.twebz.error);
+        break;
       default:
-        log("linkAccount unknown state");
+        log("linkAccount unknown state: "+doc.twebz.state);
         log(doc);
     }
   }
