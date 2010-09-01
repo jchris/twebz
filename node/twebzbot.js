@@ -38,6 +38,20 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
       "1.0", null, "HMAC-SHA1");
   }
   
+  function ok(er, doc, couch) {
+    couch = couch || db; // default to db from closure
+    if (er) {
+      doc.twebz = doc.twebz || {};
+      doc.twebz.state = "error";
+      doc.twebz.error = er;
+      couch.saveDoc(doc);
+      return false
+    } else {
+      return true;
+    }
+  }
+  
+  
   // listen for _changes on twebz db
   function getSince() {
     return 0; //todo use a view to find the highest
@@ -54,8 +68,27 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
     }
   };
 
-  function getProfileInfo(doc) {
+  function twitterConnection(couch_user, cb) {
+    // load user creds
+    var udb = client.db(twebz.user_db(doc.twebz.couch_user))
+      ;
     
+  }
+
+  function getProfileInfo(doc) {
+    if (doc.twebz.twitter_user && doc.twebz.twitter_user.user_id) {
+      var tc = tweasy.createClient()
+        , profile = tc.user({
+          user_id : doc.twebz.twitter_user.user_id
+        });
+      profile._id = "com.twitter.user:" + doc.twebz.twitter_user.user_id;
+      db.saveDoc(profile, function(er, resp) {
+        if (ok(er, doc)) {
+          doc.twebz.state = "complete";
+          db.saveDoc(doc);
+        }
+      });
+    }
   }
   
 
@@ -72,8 +105,9 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
         getProfileInfo(doc);
         break;
       case 'complete':
-        getProfileInfo(doc);
         break;
+      case 'error':
+        log(doc.twebz.error);
       default:
         log("linkAccount unknown state");
         log(doc);
@@ -85,11 +119,7 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
     udb.view("twebz-private","oauth-tokens",{
       key : ["request_token", "new"]
     }, function(er, resp) {
-      if (er) {
-        doc.twebz.state = "error";
-        doc.twebz.error = er;
-        db.saveDoc(doc);
-      } else {
+      if (ok(er, doc)) {
         if (resp.rows.length > 0) {
           // we already have a valid request token, do nothing
           log("no need to requestToken");
@@ -97,11 +127,7 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
           log("requestToken!");
           twitter_oauth.getOAuthRequestToken(function(er, 
                 oauth_token, oauth_token_secret, params) {
-            if (er) {
-              doc.twebz.state = "error";
-              doc.twebz.error = er;
-              db.saveDoc(doc);
-            } else {
+            if (ok(er, doc)) {
               // we have a request token, save it to the user-db
               udb.saveDoc({
                 type : "request_token",
@@ -111,11 +137,7 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
                 oauth_token : oauth_token,
                 params : params
               }, function(er, resp) {
-                if (er) {
-                  doc.twebz.state = "error";
-                  doc.twebz.error = er;
-                  db.saveDoc(doc);
-                } else {
+                if (ok(er, doc)) {
                   doc.twebz.state = "launched";
                   db.saveDoc(doc);
                 }
@@ -130,20 +152,14 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
   function accessToken(udb, doc, rdoc) {
     twitter_oauth.getOAuthAccessToken(doc.oauth_token, doc.oauth_token_secret,
       doc.pin, function(er, oauth_access_token, oauth_access_token_secret, extra) {
-        if (er) {
-          doc.state = "error";
-          doc.error = er;
-        } else {
+        if (ok(er, doc)) {
           doc.state = "has_access";
           doc.oauth_access_token = oauth_access_token;
           doc.oauth_access_token_secret = oauth_access_token_secret;
           doc.access_params = extra;
         }
         udb.saveDoc(doc, function(er) {
-          if (er) {
-            rdoc.twebz.state = "error";
-            rdoc.twebz.error = er;
-          } else {
+          if (ok(er, doc)) {
             rdoc.twebz.twitter_user = extra;
             rdoc.twebz.state = "connected";
           }
