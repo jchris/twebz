@@ -6,6 +6,7 @@ var tweetstream = require('tweetstream')
   , events = require('events')
   , request = require('request')
   , couchdb = require("couchdb")
+  , tweasy = require("./tweasy")
   , cc = require("couch-client")
   , OAuth= require("oauth").OAuth
   ;
@@ -53,6 +54,11 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
     }
   };
 
+  function getProfileInfo(doc) {
+    
+  }
+  
+
   function linkAccount(doc) {
     log("linkAccount state: "+doc.twebz.state);
     switch (doc.twebz.state) {
@@ -62,7 +68,11 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
       case 'launched':
         requestTokenVerified(doc);
         break;
+      case 'connected':
+        getProfileInfo(doc);
+        break;
       case 'complete':
+        getProfileInfo(doc);
         break;
       default:
         log("linkAccount unknown state");
@@ -134,7 +144,8 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
             rdoc.twebz.state = "error";
             rdoc.twebz.error = er;
           } else {
-            rdoc.twebz.state = "complete";
+            rdoc.twebz.twitter_user = extra;
+            rdoc.twebz.state = "connected";
           }
           db.saveDoc(rdoc);
         });

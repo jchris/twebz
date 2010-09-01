@@ -1,3 +1,10 @@
 <h3>Tweet here</h3>
-<div class="tweet">
-</div>
+<form>
+  <label>New Tweet: <input type="text" name="status" size=80></label>
+  <select name="account">
+    {{#twitter_accounts}}
+      <option value="{{name}}">{{name}}</option>
+    {{/twitter_accounts}}    
+  </select>
+  <input type="submit" value="Post">
+</form>
