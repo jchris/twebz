@@ -6,7 +6,7 @@ function() {
     ;
   $.couch.signup({name:twebz.app_user}, password, {
     success : function() {
-      widget.parents("div.tweet").trigger("setup_config_db");
+      widget.trigger("setup_config_db");
     }
   });
   return false;

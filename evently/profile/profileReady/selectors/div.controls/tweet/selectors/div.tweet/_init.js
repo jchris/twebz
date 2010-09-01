@@ -1,11 +1,12 @@
-function(cb) {
+function() {
+  // if you have accounts, render compose box
+  // else, move to accounts
   var widget = $(this)
   , app = $$(widget).app
   , userCtx = $$("#account").userCtx
   , twebz = app.require("lib/twebz").init(app.db.name)
-  , udb = $.couch.db(twebz.user_db(userCtx.name))
+  , docid = twebz.user_setup_docid(userCtx.name)
   ;
-  udb.view("twebz-private/twitter-accts", {
-    success : cb
-  });
+
+
 };

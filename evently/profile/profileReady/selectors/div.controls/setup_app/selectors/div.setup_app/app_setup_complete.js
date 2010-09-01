@@ -3,7 +3,7 @@ function() {
     , app = $$(widget).app
     ;
   function goInit() {
-    widget.trigger("_init");
+    widget.parents("div.controls").trigger("_init");
   }
   app.db.saveDoc({
     _id : "twebz-status",
