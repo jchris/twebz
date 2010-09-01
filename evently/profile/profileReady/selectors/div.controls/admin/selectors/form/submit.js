@@ -14,7 +14,7 @@ function() {
         doc.state = "setup-complete";
         app.db.saveDoc(doc, {
           success : function() {
-            widget.trigger("user_init");
+            widget.trigger("_init");
           }
         });
       }
@@ -52,9 +52,6 @@ function() {
         success : setAccess,
         error : setAccess
       });
-    },
-    error : function() {
-      widget.trigger("setup_user", [username]);
     }
   });
   return false;
