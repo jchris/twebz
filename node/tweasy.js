@@ -39,6 +39,21 @@ TweasyClient.prototype.user = function(params, cb) {
   this.request("http://api.twitter.com/1/users/show.json", params, cb);
 }
 
+TweasyClient.prototype.updateStatus = function(status /*, annotations, cb */) {
+  var cb, annotations, params = {};
+  if (arguments.length == 3) {
+    cb = arguments[2];
+    annotations = arguments[1];
+  } else {
+    cb = arguments[1];
+  }
+  params.status = status;
+  if (annotations) {
+    params.annotations = JSON.stringify(annotations);
+  }
+  this.request("http://api.twitter.com/1/statuses/update.json", params, "POST", cb);
+}
+
 exports.init = function(oauth, creds) {
   return new TweasyClient(oauth, creds);
 };

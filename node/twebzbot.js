@@ -107,6 +107,16 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
   function sendTweet(doc) {
     log('gonna send a tweet')
     log(doc)
+    twitterConnection(doc.twebz.profile.name, 
+      doc.user.id, function(tc) {
+        tc.updateStatus(doc.text, [{twebz : {id : doc._id}}], 
+          function(er, resp) {
+            if (ok(er, doc)) {
+              log("tweeted");
+              log(resp);
+            }
+        });
+      });
   }
   
 
