@@ -84,6 +84,22 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
     });
   }
 
+  function streamTweets(couch_user, user_id) {
+    log("streamTweets for " + couch_user + " on twitter acct " + user_id);
+    twitterConnection(couch_user, user_id, function(tc) {
+      var stream = tc.userStream();
+      stream.addListener("json", function(json) {
+        if (json.friends) {
+        } else {
+          if (json.id) {
+            json._id = json.id; //avoid duplicates
+          }
+          db.saveDoc(json);
+        }
+      });
+    });
+  };
+
   function handleTweet(doc) {
     log("handleTweet state: "+doc.twebz.state);
     switch (doc.twebz.state) {
@@ -252,6 +268,23 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
     stream.addListener("data", handleChange);
   };
 
+  function startUserStreams() {
+    db.view("twebz","account-links", {
+      startkey : ["complete"],
+      endkey : ["complete",{}]
+    }, function(er, resp) {
+      if (!er) {
+        resp.rows.forEach(function(row) {
+          if (row.value.twitter_user) {
+            streamTweets(row.value.couch_user, row.value.twitter_user.user_id);            
+          }
+        });
+      }
+    });
+  }
+  
+
   workFromChanges();
+  startUserStreams();
 });
 

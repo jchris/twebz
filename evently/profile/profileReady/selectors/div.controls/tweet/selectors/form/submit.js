@@ -9,6 +9,7 @@ function(e) {
         created_at : new Date(),
         twebz : {
           state : "unsent",
+          type :"tweet",
           profile : profile
         }
       }
