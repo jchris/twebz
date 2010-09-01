@@ -1,4 +1,4 @@
-function() {
+function(e) {
   var widget = $(this)
     , app = $$(widget).app
     , twebz = app.require("lib/twebz").init(app.db.name)
@@ -6,14 +6,18 @@ function() {
     , profile = $$("#profile").profile
     , tweet = {
         text : f.status,
-        user : {
-          
-        },
+        created_at : new Date(),
         twebz : {
+          state : "unsent",
           profile : profile
         }
       }
     ;
-  
+  app.db.openDoc(twebz.profile_docid(f.account), {
+    success : function(doc) {
+      tweet.user = doc;
+      app.db.saveDoc(tweet);
+    }
+  });
   return false;
 };

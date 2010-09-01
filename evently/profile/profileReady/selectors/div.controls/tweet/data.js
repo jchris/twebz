@@ -3,7 +3,7 @@ function(resp) {
     twitter_accounts : []
   };
   for (var i=0; i < resp.rows.length; i++) {
-    data.twitter_accounts.push({name:resp.rows[i].value.access_params.screen_name});
+    data.twitter_accounts.push(resp.rows[i].value.access_params);
   };
   return data;
 };

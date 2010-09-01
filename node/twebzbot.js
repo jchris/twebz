@@ -63,6 +63,9 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
       case 'link_account':
         linkAccount(change.doc);
         break;
+      case 'tweet':
+        handleTweet(change.doc);
+        break;
       default:
         log("unhandled change");
         log(change);
@@ -80,6 +83,32 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
       cb(tc);
     });
   }
+
+  function handleTweet(doc) {
+    log("handleTweet state: "+doc.twebz.state);
+    switch (doc.twebz.state) {
+      case 'unsent':
+        sendTweet(doc);
+        break;
+      case 'sent':
+        break;
+      case 'received':
+        break;
+      case 'error':
+        doc.twebz.error.id = doc._id;
+        log(doc.twebz.error);
+        break;
+      default:
+        log("linkAccount unknown state: "+doc.twebz.state);
+        log(doc);
+    }
+  }
+  
+  function sendTweet(doc) {
+    log('gonna send a tweet')
+    log(doc)
+  }
+  
 
   function getProfileInfo(doc) {
     if (doc.twebz.couch_user && doc.twebz.twitter_user && 
