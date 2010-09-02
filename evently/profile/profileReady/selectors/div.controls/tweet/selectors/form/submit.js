@@ -26,7 +26,6 @@ function(e) {
           var string = jsond.stringify(tweet)
             , hmac = sha1.b64_hmac_sha1(key, string)
             ;
-          $.log(string)
           tweet.twebz_signature = {
             method : "b64_hmac_sha1",
             token : hmac

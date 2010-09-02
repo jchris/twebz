@@ -144,7 +144,6 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
     } else {
       log("invalid signature! "+doc._id);
       log("got: "+hmac+" need: "+token);
-      log(string);
       return false;
     }
   }
