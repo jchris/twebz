@@ -5,7 +5,6 @@ function(e) {
     "descending" : "true",
     startkey : [name, {}],
     endkey : [name],
-    "limit" : 50,
-    "type" : "newRows"
+    "limit" : 50
   }
 };

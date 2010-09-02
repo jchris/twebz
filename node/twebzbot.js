@@ -64,10 +64,10 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
     twitterConnection(doc.twebz.couch_user, 
       doc.twebz.twitter_acct,
       function(tc) {
+        // todo check to see what tweets we already have to avoid fetching what we don't need
         tc.userTimeline({screen_name : doc.twebz.screen_name, count:20},
           function(er, tweets) {
             if (ok(er, doc)) {
-              // record the range of ids on the doc, save the tweets elsewhere
               db.bulkDocs({
                 docs : tweets.map(function(t) {
                   t._id = ""+t.id;
@@ -82,7 +82,7 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
                   doc.twebz.state = "fetched";
                   db.saveDoc(doc);
                 }
-              })
+              });
             }
           });
       });
