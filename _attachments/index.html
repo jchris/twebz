@@ -13,8 +13,7 @@
     <div id="items"></div>
 
     <div id="sidebar">
-      <p>Edit welcome message.</p>
-      <p>Ideas: You could easily turn this into a photo sharing app, or a grocery list, or a chat room.</p>
+      <div id="wordcloud"></div>
     </div>
   </body>
   <script src="vendor/couchapp/loader.js"></script>
@@ -27,6 +26,7 @@
       $("#profile").evently("profile", app);
       $.evently.connect("#account","#profile", ["loggedIn","loggedOut"]);
       $("#items").evently("items", app);
+      $("#wordcloud").evently("wordcloud", app);
       $.pathbinder.begin("/");
     });
   </script>
