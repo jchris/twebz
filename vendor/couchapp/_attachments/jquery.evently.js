@@ -22,7 +22,7 @@ function $$(node) {
     }
   };
   $.forIn = forIn;
-  function funViaString(fun) {
+  function funViaString(fun, hint) {
     if (fun && fun.match && fun.match(/^function/)) {
       eval("var f = "+fun);
       if (typeof f == "function") {
@@ -31,7 +31,8 @@ function $$(node) {
             return f.apply(this, arguments);
           } catch(e) {
             // IF YOU SEE AN ERROR HERE IT HAPPENED WHEN WE TRIED TO RUN YOUR FUNCTION
-            $.log({"message": "Error in evently function.", "error": e, "src" : fun});
+            $.log({"message": "Error in evently function.", "error": e, 
+              "src" : fun, "hint":hint});
             throw(e);
           }
         };
@@ -42,7 +43,7 @@ function $$(node) {
   
   function runIfFun(me, fun, args) {
     // if the field is a function, call it, bound to the widget
-    var f = funViaString(fun);
+    var f = funViaString(fun, me);
     if (typeof f == "function") {
       return f.apply(me, args);
     } else {
@@ -109,9 +110,6 @@ function $$(node) {
     
     if (app && events._changes) {
       $("body").bind("evently-changes-"+app.db.name, function() {
-        // we want to unbind this function when the element is deleted.
-        // maybe jquery 1.4.2 has this covered?
-        // $.log('changes', elem);
         elem.trigger("_changes");        
       });
       followChanges(app);
@@ -125,7 +123,7 @@ function $$(node) {
     if (h.path) {
       elem.pathbinder(name, h.path);
     }
-    var f = funViaString(h);
+    var f = funViaString(h, name);
     if (typeof f == "function") {
       elem.bind(name, {args:args}, f); 
     } else if (typeof f == "string") {
@@ -141,7 +139,7 @@ function $$(node) {
     } else {
       // an object is using the evently / mustache template system
       if (h.fun) {
-        elem.bind(name, {args:args}, funViaString(h.fun));
+        elem.bind(name, {args:args}, funViaString(h.fun, name));
       }
       // templates, selectors, etc are intepreted
       // when our named event is triggered.
@@ -166,7 +164,7 @@ function $$(node) {
     // if there's a query object we run the query,
     // and then call the data function with the response.
     if (h.before && (!qrun || !arun)) {
-      funViaString(h.before).apply(me, args);
+      funViaString(h.before, me).apply(me, args);
     }
     if (h.async && !arun) {
       runAsync(me, h, args)
@@ -200,7 +198,6 @@ function $$(node) {
       }
       if (h.after) {
         runIfFun(me, h.after, args);
-        // funViaString(h.after).apply(me, args);
       }
     }    
   };
@@ -215,7 +212,7 @@ function $$(node) {
   
   function runAsync(me, h, args) {  
     // the callback is the first argument
-    funViaString(h.async).apply(me, [function() {
+    funViaString(h.async, me).apply(me, [function() {
       renderElement(me, h, 
         $.argsToArray(arguments).concat($.argsToArray(args)), false, true);
     }].concat($.argsToArray(args)));
