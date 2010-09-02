@@ -94,7 +94,7 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
       case 'request':
         requestRecentTweets(doc);
         break;
-      case 'complete':
+      case 'fetched':
         break;
       case 'error':
         doc.twebz.error.id = doc._id;
