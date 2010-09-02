@@ -3,14 +3,16 @@ function(tweet) {
     var wordCounts = {};
     var words = tweet.text.toLowerCase().split(/\s/);
     words.forEach(function(word) {
-      word = word.replace(/[\.:,!]*$/g,'');
+      if (word.match(/\/|\:/)) return;
+      word = word.replace(/[^\w\-_'\.\@]/g,"").replace(/\W*$/,"").replace(/^\W*/,"").replace(/'\w{1,2}$/,"");
       if (word.length > 2) {
         wordCounts[word] = wordCounts[word] || 0;
         wordCounts[word]++;
       }
     });
     for (var w in wordCounts) {
-      emit([tweet.user.id, w], wordCounts[w]);
+      if (wordCounts.hasOwnProperty(w))
+        emit([tweet.user.id, w], (parseInt(wordCounts[w]) || 0));
     }
   }
 };
