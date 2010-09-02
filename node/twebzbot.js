@@ -160,6 +160,7 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
               tc.updateStatus(doc.text, [{twebz : {id : doc._id}}], 
                 function(er, resp) {
                   if (ok(er, doc)) {
+                    log("sent tweet for "+doc.user.screen_name+": "+doc.text);
                     doc.twebz.state = 'sent';
                     doc.twebz.twitter_id = resp.id;
                     db.saveDoc(doc);

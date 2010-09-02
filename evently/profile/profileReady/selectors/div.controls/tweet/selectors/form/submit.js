@@ -31,7 +31,11 @@ function(e) {
             method : "b64_hmac_sha1",
             token : hmac
           };
-          app.db.saveDoc(tweet);
+          app.db.saveDoc(tweet, {
+            success : function() {
+              widget[0].reset();
+            }
+          });
         }
       });
     }
