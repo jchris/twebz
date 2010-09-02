@@ -65,7 +65,7 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
       doc.twebz.twitter_acct,
       function(tc) {
         // todo check to see what tweets we already have to avoid fetching what we don't need
-        tc.userTimeline({screen_name : doc.twebz.screen_name, count:20},
+        tc.userTimeline({screen_name : doc.twebz.screen_name, count:100},
           function(er, tweets) {
             if (ok(er, doc)) {
               db.bulkDocs({
