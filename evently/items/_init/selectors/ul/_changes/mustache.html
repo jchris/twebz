@@ -1,6 +1,8 @@
 <li>
   <div class="avatar">
-    {{#image_url}}<img src="{{image_url}}" alt="{{name}}"/>{{/image_url}}
+    {{#image_url}}
+      <a href="#/user/{{name}}"><img src="{{image_url}}" alt="{{name}}"/></a>
+    {{/image_url}}
     <div class="name">
       {{nickname}}
     </div>
