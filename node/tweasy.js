@@ -50,6 +50,10 @@ TweasyClient.prototype.user = function(params, cb) {
   this.request("http://api.twitter.com/1/users/show.json", params, cb);
 }
 
+TweasyClient.prototype.userTimeline = function(params, cb) {
+  this.request("http://api.twitter.com/1/statuses/user_timeline.json", params, cb);
+}
+
 TweasyClient.prototype.updateStatus = function(status /*, annotations, cb */) {
   var cb, annotations, params = {};
   if (arguments.length == 3) {

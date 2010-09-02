@@ -60,6 +60,52 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
     return 0; //todo use a view to find the highest
   };
 
+  function requestRecentTweets(doc) {
+    twitterConnection(doc.twebz.couch_user, 
+      doc.twebz.twitter_acct,
+      function(tc) {
+        tc.userTimeline({screen_name : doc.twebz.screen_name, count:20},
+          function(er, tweets) {
+            if (ok(er, doc)) {
+              // record the range of ids on the doc, save the tweets elsewhere
+              db.bulkDocs({
+                docs : tweets.map(function(t) {
+                  t._id = ""+t.id;
+                  return t;
+                })
+              }, function(er, resp) {
+                if (ok(er, doc)) {
+                  doc.twebz.tweet_range = {
+                    start : tweets[tweets.length -1].id,
+                    end : tweets[0].id
+                  }
+                  doc.twebz.state = "fetched";
+                  db.saveDoc(doc);
+                }
+              })
+            }
+          });
+      });
+  };
+
+  function recentTweets(doc) {
+    log("recentTweets state: "+doc.twebz.state);
+    switch (doc.twebz.state) {
+      case 'request':
+        requestRecentTweets(doc);
+        break;
+      case 'complete':
+        break;
+      case 'error':
+        doc.twebz.error.id = doc._id;
+        log(doc.twebz.error);
+        break;
+      default:
+        log("recentTweets unknown state: "+doc.twebz.state);
+        log(doc);
+    }
+  };
+
   function handleChange(change) {
     switch (change.doc.twebz.type) {
       case 'link_account':
@@ -67,6 +113,9 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
         break;
       case 'tweet':
         handleTweet(change.doc);
+        break;
+      case 'user-recent':
+        recentTweets(change.doc);
         break;
       default:
         log("unhandled change");
@@ -76,8 +125,7 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
 
   function twitterConnection(couch_user, user_id, cb) {
     // load user creds
-    var udb = client.db(twebz.user_db(couch_user))
-      ;
+    var udb = client.db(twebz.user_db(couch_user));
     udb.view("twebz-private", "twitter-accts", {
       key : parseInt(user_id)
     }, function(er, resp) {

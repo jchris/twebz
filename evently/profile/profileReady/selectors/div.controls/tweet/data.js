@@ -1,9 +1,13 @@
 function(resp) {
-  var data = {
-    twitter_accounts : []
-  };
+  var acct, data = {
+      twitter_accounts : []
+    }, current = $.cookie("twitter_acct");
   for (var i=0; i < resp.rows.length; i++) {
-    data.twitter_accounts.push(resp.rows[i].value.access_params);
+    acct = resp.rows[i].value.access_params;
+    if (acct.user_id == current) {
+      acct.selected = "selected";
+    }
+    data.twitter_accounts.push(acct);
   };
   return data;
 };
