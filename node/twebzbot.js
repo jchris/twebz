@@ -92,10 +92,17 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
         if (json.friends) {
         } else {
           if (json.id) {
-            json._id = json.id; //avoid duplicates
+            json._id = ""+json.id; //avoid duplicates
           }
           db.saveDoc(json);
         }
+      });
+      stream.addListener("error", function(er) {
+        log("error streaming for acct "+ user_id);
+        log(er)
+      });
+      stream.addListener("end", function() {
+        log("end streaming for acct "+ user_id);
       });
     });
   };
