@@ -1,5 +1,5 @@
 function(tweet) {
-  if (tweet.id && tweet.text && tweet.user && tweet.user.id) {
+  if (tweet.id && tweet.text && tweet.user && tweet.user.screen_name) {
     var wordCounts = {};
     var words = tweet.text.toLowerCase().split(/\s/);
     words.forEach(function(word) {
@@ -12,7 +12,7 @@ function(tweet) {
     });
     for (var w in wordCounts) {
       if (wordCounts.hasOwnProperty(w))
-        emit([tweet.user.id, w], (parseInt(wordCounts[w]) || 0));
+        emit([tweet.user.screen_name, w], (parseInt(wordCounts[w]) || 0));
     }
   }
 };
