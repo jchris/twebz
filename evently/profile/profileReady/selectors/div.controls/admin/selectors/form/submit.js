@@ -22,7 +22,7 @@ function() {
   };
   function setSecret() {
     udb.saveDoc({
-      _id : "twebz-secret",
+      _id : twebz.secret_docid,
       token : twebz.randomToken()
     }, {
       success : setupComplete,

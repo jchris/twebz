@@ -122,11 +122,6 @@ function $$(node) {
   // eventlyHandler applies the user's handler (h) to the 
   // elem, bound to trigger based on name.
   function eventlyHandler(elem, name, h, args) {
-    if ($.evently.log) {
-      elem.bind(name, function() {
-        $.log(elem, name);
-      });
-    }
     if (h.path) {
       elem.pathbinder(name, h.path);
     }
@@ -214,7 +209,7 @@ function $$(node) {
   function mustachioed(me, h, args) {
     return $($.mustache(
       runIfFun(me, h.mustache, args),
-      (runIfFun(me, h.data, args) || {}), 
+      runIfFun(me, h.data, args), 
       runIfFun(me, h.partials, args)));
   };
   
@@ -238,9 +233,7 @@ function $$(node) {
     
     var q = {};
     forIn(qu, function(k, v) {
-      if (["type", "view"].indexOf(k) == -1) {
-        q[k] = v;
-      }
+      q[k] = v;
     });
     
     if (qType == "newRows") {

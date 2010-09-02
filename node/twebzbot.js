@@ -9,6 +9,8 @@ var tweetstream = require('tweetstream')
   , tweasy = require("./tweasy")
   , cc = require("couch-client")
   , OAuth= require("oauth").OAuth
+  , jsond = require("../lib/jsond")
+  , sha1 = require("../lib/sha1")
   ;
 
 function log(e) {
@@ -126,19 +128,48 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
         log(doc);
     }
   }
-  
+
+  function validSignature(key, doc) {
+    var clone = JSON.parse(JSON.stringify(doc));
+    delete clone._id;
+    delete clone._rev;
+    delete clone.twebz_signature;
+    var string = jsond.stringify(clone)
+      , hmac = sha1.b64_hmac_sha1(key, string)
+      , token = doc.twebz_signature && doc.twebz_signature.token
+      ;
+    if (token && 
+        hmac === token) {
+      return true;
+    } else {
+      log("invalid signature! "+doc._id);
+      log("got: "+hmac+" need: "+token);
+      log(string);
+      return false;
+    }
+  }
+
   function sendTweet(doc) {
-    twitterConnection(doc.twebz.profile.name, 
-      doc.user.id, function(tc) {
-        tc.updateStatus(doc.text, [{twebz : {id : doc._id}}], 
-          function(er, resp) {
-            if (ok(er, doc)) {
-              doc.twebz.state = 'sent';
-              doc.twebz.twitter_id = resp.id;
-              db.saveDoc(doc);
-            }
-        });
-      });
+    // first check the hmac
+    var udb = client.db(twebz.user_db(doc.twebz.profile.name));
+    udb.getDoc(twebz.secret_docid, function(er, secret) {
+      if (ok(er, doc)) {
+        var key = secret.token;
+        if (validSignature(key, doc)) {
+          twitterConnection(doc.twebz.profile.name, 
+            doc.user.id, function(tc) {
+              tc.updateStatus(doc.text, [{twebz : {id : doc._id}}], 
+                function(er, resp) {
+                  if (ok(er, doc)) {
+                    doc.twebz.state = 'sent';
+                    doc.twebz.twitter_id = resp.id;
+                    db.saveDoc(doc);
+                  }
+              });
+            });
+        }
+      }
+    });
   }
   
 
