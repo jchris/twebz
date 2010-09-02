@@ -131,7 +131,7 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
 
   function validSignature(key, doc) {
     var clone = JSON.parse(JSON.stringify(doc));
-    delete clone._id;
+    delete clone._id; // remove this
     delete clone._rev;
     delete clone.twebz_signature;
     var string = jsond.stringify(clone)

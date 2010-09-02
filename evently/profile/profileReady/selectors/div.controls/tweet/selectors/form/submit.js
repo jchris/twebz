@@ -8,6 +8,7 @@ function(e) {
     , f = $(this).serializeObject()
     , profile = $$("#profile").profile
     , tweet = {
+      // _id : uuid
         text : f.status,
         created_at : new Date(),
         twebz : {
