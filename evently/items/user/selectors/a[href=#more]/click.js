@@ -11,10 +11,7 @@ function(e) {
       couch_user : $$("#account").userCtx.name,
       twitter_acct : $.cookie("twitter_acct")
     }
-  }, {
-    success : function() {
-      a.text("Loading...");
-    }
   });
+  a.text("Loading...");
   return false;
 };

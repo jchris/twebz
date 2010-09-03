@@ -1,4 +1,4 @@
-function(userWords) {
+function(userWords, e, params) {
   var w, cloud = [];
   for (var i=0; i < userWords.length; i++) {
     w = userWords[i];
@@ -10,6 +10,7 @@ function(userWords) {
     }
   };
   return {
+    name : params.screen_name,
     cloud : cloud
   };
 };

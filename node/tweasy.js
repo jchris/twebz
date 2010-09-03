@@ -24,12 +24,15 @@ TweasyClient.prototype.request = function(url, params /*, method, cb */) {
   }
   if (cb) {
     tweasycb = function (er, data, resp) {
-      if (!er) {
-        try {
-          data = JSON.parse(data);
-        } catch(e) {}
+      try {
+        data = JSON.parse(data);
+        cb(er, data, resp);
+      } catch(e) {
+        cb({
+          error : er,
+          json_error : e
+        }, data, resp);
       }
-      cb(er, data, resp);
     };
   };
 
