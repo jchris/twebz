@@ -3,7 +3,7 @@ function(tweet) {
     var wordCounts = {};
     var words = tweet.text.toLowerCase().split(/\s/);
     words.forEach(function(word) {
-      if (word.match(/\/|\:/)) return;
+      if (word.match(/\/|\:/)||word.match(/^@/)) return;
       word = word.replace(/[^\w\-_'\.\@]/g,"").replace(/\W*$/,"").replace(/^\W*/,"").replace(/'\w{1,2}$/,"");
       if (word.length > 2) {
         wordCounts[word] = wordCounts[word] || 0;
