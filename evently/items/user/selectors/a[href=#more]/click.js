@@ -3,15 +3,17 @@ function(e) {
     , a = $(this)
     , app = $$(a).app
     ;
-  app.db.saveDoc({
-    twebz : {
-      type : "user-recent",
-      state : "request",
-      screen_name : name,
-      couch_user : $$("#account").userCtx.name,
-      twitter_acct : $.cookie("twitter_acct")
-    }
-  });
+  if ($(a).text() != "Loading...") {
+    app.db.saveDoc({
+      twebz : {
+        type : "user-recent",
+        state : "request",
+        screen_name : name,
+        couch_user : $$("#account").userCtx.name,
+        twitter_acct : $.cookie("twitter_acct")
+      }
+    });
+  }
   a.text("Loading...");
   return false;
 };
