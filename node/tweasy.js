@@ -30,7 +30,8 @@ TweasyClient.prototype.request = function(url, params /*, method, cb */) {
       } catch(e) {
         cb({
           error : er,
-          json_error : e
+          json_error : e,
+          data : data
         }, data, resp);
       }
     };

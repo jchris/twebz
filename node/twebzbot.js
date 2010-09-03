@@ -43,7 +43,7 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
   function ok(er, doc, couch) {
     couch = couch || db; // default to db from closure
     if (er) {
-      log(['error', doc._id, er]);
+      // log(['error', doc._id, er]);
       doc.twebz = doc.twebz || {};
       doc.twebz.state = "error";
       doc.twebz.error = er;
@@ -53,18 +53,13 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
       return true;
     }
   }
-  
-  
-  // listen for _changes on twebz db
-  function getSince() {
-    return 0; //todo use a view to find the highest
-  };
 
   function requestRecentTweets(doc) {
     twitterConnection(doc.twebz.couch_user, 
       doc.twebz.twitter_acct,
       function(tc) {
         // todo check to see what tweets we already have to avoid fetching what we don't need
+        log("fetch recent tweets from "+doc.twebz.screen_name);
         tc.userTimeline({screen_name : doc.twebz.screen_name, count:100},
           function(er, tweets) {
             if (ok(er, doc)) {
@@ -92,13 +87,13 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
     log("recentTweets state: "+doc.twebz.state);
     switch (doc.twebz.state) {
       case 'request':
+        // doc.twebz.state = "skipped";
+        // db.saveDoc(doc);
         requestRecentTweets(doc);
         break;
-      case 'fetched':
+      case 'skipped':
         break;
-      case 'error':
-        doc.twebz.error.id = doc._id;
-        log(doc.twebz.error);
+      case 'fetched':
         break;
       default:
         log("recentTweets unknown state: "+doc.twebz.state);
@@ -107,6 +102,11 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
   };
 
   function handleChange(change) {
+    change.doc.twebz.seq = change.seq;
+    if (change.doc.twebz.state == "error") {
+      log("error state: "+change.doc._id);
+      return;
+    }
     switch (change.doc.twebz.type) {
       case 'link_account':
         linkAccount(change.doc);
@@ -166,10 +166,6 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
       case 'sent':
         break;
       case 'received':
-        break;
-      case 'error':
-        doc.twebz.error.id = doc._id;
-        log(doc.twebz.error);
         break;
       default:
         log("linkAccount unknown state: "+doc.twebz.state);
@@ -263,10 +259,6 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
         break;
       case 'complete':
         break;
-      case 'error':
-        doc.twebz.error.id = doc._id;
-        log(doc.twebz.error);
-        break;
       default:
         log("linkAccount unknown state: "+doc.twebz.state);
         log(doc);
@@ -344,14 +336,22 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
     });
   }
 
+  // listen for _changes on twebz db
+  function getSince(cb) {
+    db.view("twebz","seq", {}, function(er, resp) {
+      cb(resp.rows[0].value.max);
+    });
+  };
 
   function workFromChanges() {
-    var stream = db.changesStream({
-      filter : "twebz/twebz",
-      include_docs : true,
-      since : getSince()
+    getSince(function(since) {
+      var stream = db.changesStream({
+        filter : "twebz/twebz",
+        include_docs : true,
+        since : since
+      });
+      stream.addListener("data", handleChange);
     });
-    stream.addListener("data", handleChange);
   };
 
   function startUserStreams() {
