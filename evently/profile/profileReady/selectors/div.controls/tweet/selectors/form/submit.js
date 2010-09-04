@@ -8,7 +8,7 @@ function(e) {
     , f = $(this).serializeObject()
     , profile = $$("#profile").profile
     , tweet = {
-      // _id : uuid
+        _id : $.couch.newUUID(),
         text : f.status,
         created_at : new Date(),
         twebz : {
