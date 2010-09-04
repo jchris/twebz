@@ -5,6 +5,7 @@ function(userWords, e) {
     if (w.weight >= 2.718) {
       cloud.push({
         word : w.word,
+        count : w.count,
         size : (Math.log(w.weight)) * 10
       });
     }

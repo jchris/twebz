@@ -6,7 +6,7 @@ var tweetstream = require('tweetstream')
   , events = require('events')
   , request = require('request')
   , couchdb = require("couchdb")
-  , tweasy = require("./tweasy")
+  , tweasy = require("tweasy")
   , cc = require("couch-client")
   , OAuth= require("oauth").OAuth
   , jsond = require("../lib/jsond")
@@ -32,6 +32,8 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
   if (er) {
     log("error loading twitter_keys");
     log(er);
+    log([twebz.app_user, config.passcode]);
+    process.exit(1);
   } else {
     twitter_oauth = new OAuth(
       "http://twitter.com/oauth/request_token",
@@ -129,8 +131,16 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
     udb.view("twebz-private", "twitter-accts", {
       key : parseInt(user_id)
     }, function(er, resp) {
-      var tc = tweasy.init(twitter_oauth, resp.rows[0].value);
-      cb(tc);
+      if (resp.rows[0]) {
+        var v = resp.rows[0].value
+          , tc = tweasy.init(twitter_oauth, {
+            access_token : v.oauth_access_token,
+            access_token_secret : v.oauth_access_token_secret
+          });
+        cb(tc);
+      } else {
+        log("can't get twitter conection for "+couch_user+" and "+user_id);
+      }
     });
   }
 
@@ -152,6 +162,7 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
         log(er)
       });
       stream.addListener("end", function() {
+        log(arguments)
         log("end streaming for acct "+ user_id);
       });
     });
@@ -215,7 +226,6 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
       }
     });
   }
-  
 
   function getProfileInfo(doc) {
     if (doc.twebz.couch_user && doc.twebz.twitter_user && 
@@ -227,7 +237,7 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
         }
         twitterConnection(doc.twebz.couch_user, 
           doc.twebz.twitter_user.user_id, function(tc) {
-            tc.user({
+            tc.userProfile({
               user_id : doc.twebz.twitter_user.user_id
             }, function(er, profile) {
               delete profile.status;
@@ -339,7 +349,11 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
   // listen for _changes on twebz db
   function getSince(cb) {
     db.view("twebz","seq", {}, function(er, resp) {
-      cb(resp.rows[0].value.max);
+      if (resp.rows.length > 0) {
+        cb(resp.rows[0].value.max);
+      } else {
+        cb(0);
+      }
     });
   };
 
@@ -368,9 +382,7 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
       }
     });
   }
-  
 
   workFromChanges();
   startUserStreams();
 });
-

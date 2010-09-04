@@ -1,4 +1,6 @@
 {
+  "xpasscode" : "4879332c65153ca9326e495961d30dc7",
+  "xdb" : "http://jchris.couchone.com:80/twebz",
   "passcode" : "twebz",
   "db" : "http://localhost:5984/twebz"
 }
