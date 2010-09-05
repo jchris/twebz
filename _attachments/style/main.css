@@ -70,6 +70,12 @@ div.twbody {
   width:90%;
 }
 
+div.twbody .date {
+  float:right;
+  font-size:80%;
+  color:#bbb;
+}
+
 div.twbody p {
   margin:0;
   margin-top:0.4em;
@@ -77,7 +83,6 @@ div.twbody p {
 
 .name a {
   color:#000;
-/*  font-size:90%;*/
   font-weight:bold;
   text-decoration:none;
 }
