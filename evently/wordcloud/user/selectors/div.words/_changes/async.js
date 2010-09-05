@@ -2,7 +2,7 @@ function(cb, e, params) {
   var widget = $(this)
   , app = $$(widget).app
   , cloud = app.require("lib/wordcloud")
-  , name = e.data.args[1].screen_name
+  , name = e.data.args[1].screen_name.toLowerCase()
   ;
   function userCloud(gWC) {
     app.view("userWordCount",{
