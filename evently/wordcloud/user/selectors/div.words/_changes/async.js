@@ -28,8 +28,7 @@ function(cb, e, params) {
           app.db.saveDoc({_id:"globalWordCount", cloud : gWC});
           userCloud(gWC);
         }
-      });      
+      });
     }
   })
-
 };
