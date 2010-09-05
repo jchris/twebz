@@ -58,7 +58,7 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
 
   function requestSearch(doc) {
     twitterConnection(doc.twebz.couch_user, 
-      doc.twebz.twitter_acct,
+      doc.twebz.twitter_acct, {},
       function(tc) {
         // todo check to see what tweets we already have to avoid fetching what we don't need
         log("fetch search term "+doc.twebz.term);
@@ -90,9 +90,48 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
       });
   };
 
+  function requestMoreTweets(doc) {
+    twitterConnection(doc.twebz.couch_user, 
+      doc.twebz.twitter_acct, {},
+      function(tc) {
+        // todo check to see what tweets we already have to avoid fetching what we don't need
+        db.view("twebz", "recent-by-user", {
+          limit : 1,
+          startkey : [doc.twebz.screen_name.toLowerCase()]
+        }, function(er, view) {
+          var max = view.rows[0].value.id-1;
+          log("fetch more tweets from "+doc.twebz.screen_name+" starting at "+max);
+          tc.userTimeline({
+            screen_name : doc.twebz.screen_name, 
+            count:100, max_id : max
+          },
+            function(er, tweets) {
+              if (ok(er, doc)) {
+                db.bulkDocs({
+                  docs : tweets.map(function(t) {
+                    t._id = ""+t.id;
+                    return t;
+                  })
+                }, function(er, resp) {
+                  if (ok(er, doc)) {
+                    if (tweets.length > 0) {
+                      doc.twebz.tweet_range.start = tweets[tweets.length -1].id;
+                    } else {
+                      doc.twebz.state = "done";
+                    }
+                    db.saveDoc(doc);
+                  }
+                });
+              }
+            });
+        });
+      });
+  }
+  
+
   function requestRecentTweets(doc) {
     twitterConnection(doc.twebz.couch_user, 
-      doc.twebz.twitter_acct,
+      doc.twebz.twitter_acct, {},
       function(tc) {
         // todo check to see what tweets we already have to avoid fetching what we don't need
         log("fetch recent tweets from "+doc.twebz.screen_name);
@@ -121,7 +160,7 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
       });
   };
 
-  function twitterConnection(couch_user, user_id, cb) {
+  function twitterConnection(couch_user, user_id, opts, cb) {
     // load user creds
     var udb = client.db(twebz.user_db(couch_user));
     udb.view("twebz-private", "twitter-accts", {
@@ -132,7 +171,7 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
           , tc = tweasy.init(twitter_oauth, {
             access_token : v.oauth_access_token,
             access_token_secret : v.oauth_access_token_secret
-          });
+          }, opts);
         cb(tc);
       } else {
         log("can't get twitter conection for "+couch_user+" and "+user_id);
@@ -142,7 +181,7 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
 
   function streamTweets(couch_user, user_id) {
     log("streamTweets for " + couch_user + " on twitter acct " + user_id);
-    twitterConnection(couch_user, user_id, function(tc) {
+    twitterConnection(couch_user, user_id, {}, function(tc) {
       var stream = tc.userStream();
       stream.addListener("json", function(json) {
         if (json.friends) {
@@ -191,7 +230,7 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
         var key = secret.token;
         if (validSignature(key, doc)) {
           twitterConnection(doc.twebz.profile.name, 
-            doc.user.id, function(tc) {
+            doc.user.id, {}, function(tc) {
               tc.updateStatus(doc.text, [{twebz : {id : doc._id}}], 
                 function(er, resp) {
                   if (ok(er, doc)) {
@@ -216,7 +255,7 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
           profile_doc = {_id : profile_id};
         }
         twitterConnection(doc.twebz.couch_user, 
-          doc.twebz.twitter_user.user_id, function(tc) {
+          doc.twebz.twitter_user.user_id, {}, function(tc) {
             tc.userProfile({
               user_id : doc.twebz.twitter_user.user_id
             }, function(er, profile) {
@@ -309,6 +348,7 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
   var machine = stately.define({
     _before : function(change, cb) {
       change.doc.twebz.seq = change.seq;
+      log("doc: "+change.doc._id+ " state: "+change.doc.twebz.state);
       cb(change.doc);
     },
     _getState : function(doc, cb) {
@@ -327,6 +367,10 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
     },
     "user-recent" : {
       request : requestRecentTweets
+    },
+    "user-archive" : {
+      request : requestRecentTweets,
+      fetched : requestMoreTweets
     },
     "search-recent" : {
       request : requestSearch
