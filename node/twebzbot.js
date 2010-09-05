@@ -8,7 +8,6 @@ var tweetstream = require('tweetstream')
   , couchdb = require("couchdb")
   , tweasy = require("tweasy")
   , stately = require("stately")
-  , cc = require("couch-client")
   , OAuth= require("oauth").OAuth
   , jsond = require("../lib/jsond")
   , sha1 = require("../lib/sha1")
