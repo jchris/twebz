@@ -22,7 +22,7 @@ function(cb, e, params) {
     error : function() {
       // create the global cloud
       app.view("globalWordCount", {
-        "group" : true,
+        "group_level" : 1,
         success : function(view) {
           var gWC = cloud.globalCount(view);
           app.db.saveDoc({_id:"globalWordCount", cloud : gWC});

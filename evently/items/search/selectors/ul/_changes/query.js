@@ -5,9 +5,9 @@ function(e) {
     "descending" : "true",
     reduce : false,
     include_docs : true,
-    key : term,
-    // startkey : [term, {}],
-    // endkey : [term],
+    // key : term,
+    startkey : [term, {}],
+    endkey : [term],
     "limit" : 50
   }
 };

@@ -11,7 +11,7 @@ function(tweet) {
     });
     for (var w in wordCounts) {
       if (wordCounts.hasOwnProperty(w))
-        emit(w, 1);
+        emit([w, new Date(tweet.created_at)], 1);
     }
   }
 };

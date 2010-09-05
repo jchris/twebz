@@ -6,7 +6,7 @@ function(r) {
   return {
     image_url : user.profile_image_url,
     name : user.screen_name,
-    nickname : user.name,
+    nickname : user.name || user.screen_name,
     message : linkup.encode(v.text, "#/user/")
   };
 };
