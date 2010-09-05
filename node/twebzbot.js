@@ -106,9 +106,11 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
                 })
               }, function(er, resp) {
                 if (ok(er, doc)) {
-                  doc.twebz.tweet_range = {
-                    start : tweets[tweets.length -1].id,
-                    end : tweets[0].id
+                  if (tweets.length > 0) {
+                    doc.twebz.tweet_range = {
+                      start : tweets[tweets.length -1].id,
+                      end : tweets[0].id
+                    };
                   }
                   doc.twebz.state = "fetched";
                   db.saveDoc(doc);
