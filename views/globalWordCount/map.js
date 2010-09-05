@@ -6,13 +6,12 @@ function(tweet) {
       if (word.match(/\/|\:/)||word.match(/^@/)) return;
       word = word.replace(/[^\w\-_'\.\@]/g,"").replace(/\W*$/,"").replace(/^\W*/,"").replace(/'\w{1,2}$/,"");
       if (word.length > 2) {
-        wordCounts[word] = wordCounts[word] || 0;
-        wordCounts[word]++;
+        wordCounts[word] = true;
       }
     });
     for (var w in wordCounts) {
       if (wordCounts.hasOwnProperty(w))
-        emit(w, (parseInt(wordCounts[w]) || 0));
+        emit(w, 1);
     }
   }
 };
