@@ -56,6 +56,40 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
     }
   }
 
+  function requestSearch(doc) {
+    twitterConnection(doc.twebz.couch_user, 
+      doc.twebz.twitter_acct,
+      function(tc) {
+        // todo check to see what tweets we already have to avoid fetching what we don't need
+        log("fetch search term "+doc.twebz.term);
+        tc.search({q : doc.twebz.term, rpp:100},
+          function(er, search) {
+            if (ok(er, doc)) {
+              var tweets = search.results;
+              db.bulkDocs({
+                docs : tweets.map(function(t) {
+                  t._id = ""+t.id;
+                  t.user = {
+                    screen_name : t.from_user,
+                    profile_image_url : t.profile_image_url
+                  };
+                  return t;
+                })
+              }, function(er, resp) {
+                if (ok(er, doc)) {
+                  doc.twebz.tweet_range = {
+                    start : tweets[tweets.length -1].id,
+                    end : search.max_id
+                  }
+                  doc.twebz.state = "fetched";
+                  db.saveDoc(doc);
+                }
+              });
+            }
+          });
+      });
+  };
+
   function requestRecentTweets(doc) {
     twitterConnection(doc.twebz.couch_user, 
       doc.twebz.twitter_acct,
@@ -291,6 +325,9 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
     },
     "user-recent" : {
       request : requestRecentTweets
+    },
+    "search-recent" : {
+      request : requestSearch
     },
     _default : function(doc) {
       log("unhandled change");
