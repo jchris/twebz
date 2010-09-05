@@ -1,5 +1,4 @@
 function(resp) {
-  // this is the same as user.selectors.ul
   var app = $$(this).app,
   linkup = app.require("vendor/couchapp/lib/linkup");
   return {

@@ -76,15 +76,32 @@ function $$(node) {
 
   function extractEvents(name, ddoc) {
     // extract events from ddoc.evently and ddoc.vendor.*.evently
-    var events = [true, {}];
-    $.forIn(ddoc.vendor, function(k, v) {
+    var events = [true, {}]
+      , vendor = ddoc.vendor || {}
+      , evently = ddoc.evently || {};
+      ;
+    $.forIn(vendor, function(k, v) {
       if (v.evently && v.evently[name]) {
         events.push(v.evently[name]);
       }
     });
-    if (ddoc.evently[name]) {events.push(ddoc.evently[name]);}
+    if (evently[name]) {events.push(evently[name]);}
     return $.extend.apply(null, events);
   }
+
+  function extractPartials(ddoc) {
+    var partials = [true, {}]
+      , vendor = ddoc.vendor || {}
+      , evently = ddoc.evently || {};
+      ;
+    $.forIn(vendor, function(k, v) {
+      if (v.evently && v.evently._partials) {
+        partials.push(v.evently._partials);
+      }
+    });
+    if (evently._partials) {events.push(ddoc.evently._partials);}
+    return $.extend.apply(null, partials);
+  };
 
   $.fn.evently = function(events, app, args) {
     var elem = $(this);
@@ -98,6 +115,7 @@ function $$(node) {
     }
 
     $$(elem).evently = events;
+    $$(elem).partials = extractPartials(app.ddoc);
     // setup the handlers onto elem
     forIn(events, function(name, h) {
       eventlyHandler(elem, name, h, args);
@@ -204,10 +222,11 @@ function $$(node) {
   
   // todo this should return the new element
   function mustachioed(me, h, args) {
+    var partials = $$(me).partials;
     return $($.mustache(
       runIfFun(me, h.mustache, args),
       runIfFun(me, h.data, args), 
-      runIfFun(me, h.partials, args)));
+      runIfFun(me, $.extend(true, partials, h.partials), args)));
   };
   
   function runAsync(me, h, args) {  
