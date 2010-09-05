@@ -7,6 +7,7 @@ var tweetstream = require('tweetstream')
   , request = require('request')
   , couchdb = require("couchdb")
   , tweasy = require("tweasy")
+  , stately = require("stately")
   , cc = require("couch-client")
   , OAuth= require("oauth").OAuth
   , jsond = require("../lib/jsond")
@@ -85,46 +86,6 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
       });
   };
 
-  function recentTweets(doc) {
-    log("recentTweets state: "+doc.twebz.state);
-    switch (doc.twebz.state) {
-      case 'request':
-        // doc.twebz.state = "skipped";
-        // db.saveDoc(doc);
-        requestRecentTweets(doc);
-        break;
-      case 'skipped':
-        break;
-      case 'fetched':
-        break;
-      default:
-        log("recentTweets unknown state: "+doc.twebz.state);
-        log(doc);
-    }
-  };
-
-  function handleChange(change) {
-    change.doc.twebz.seq = change.seq;
-    if (change.doc.twebz.state == "error") {
-      log("error state: "+change.doc._id);
-      return;
-    }
-    switch (change.doc.twebz.type) {
-      case 'link_account':
-        linkAccount(change.doc);
-        break;
-      case 'tweet':
-        handleTweet(change.doc);
-        break;
-      case 'user-recent':
-        recentTweets(change.doc);
-        break;
-      default:
-        log("unhandled change");
-        log(change);
-    }
-  };
-
   function twitterConnection(couch_user, user_id, cb) {
     // load user creds
     var udb = client.db(twebz.user_db(couch_user));
@@ -167,22 +128,6 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
       });
     });
   };
-
-  function handleTweet(doc) {
-    log("handleTweet state: "+doc.twebz.state);
-    switch (doc.twebz.state) {
-      case 'unsent':
-        sendTweet(doc);
-        break;
-      case 'sent':
-        break;
-      case 'received':
-        break;
-      default:
-        log("linkAccount unknown state: "+doc.twebz.state);
-        log(doc);
-    }
-  }
 
   function validSignature(key, doc) {
     var clone = JSON.parse(JSON.stringify(doc));
@@ -252,26 +197,6 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
             });
           });
       });
-    }
-  }
-
-  function linkAccount(doc) {
-    log("linkAccount state: "+doc.twebz.state);
-    switch (doc.twebz.state) {
-      case 'request':
-        requestToken(doc);
-        break;
-      case 'launched':
-        requestTokenVerified(doc);
-        break;
-      case 'connected':
-        getProfileInfo(doc);
-        break;
-      case 'complete':
-        break;
-      default:
-        log("linkAccount unknown state: "+doc.twebz.state);
-        log(doc);
     }
   }
 
@@ -346,6 +271,37 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
     });
   }
 
+  var machine = stately.define({
+    _before : function(change, cb) {
+      change.doc.twebz.seq = change.seq;
+      cb(change.doc);
+    },
+    _getState : function(doc, cb) {
+      cb(doc.twebz.state);
+    },
+    _getType : function(doc, cb) {
+      cb(doc.twebz.type);
+    },
+    link_account : {
+      request : requestToken,
+      launched : requestTokenVerified,
+      connected : getProfileInfo
+    },
+    tweet : {
+      unsent : sendTweet
+    },
+    "user-recent" : {
+      request : requestRecentTweets
+    },
+    _default : function(doc) {
+      log("unhandled change");
+      log(doc);
+    },
+    error : function(doc) {
+      log("error state: "+doc._id);
+    }
+  });
+
   // listen for _changes on twebz db
   function getSince(cb) {
     db.view("twebz","seq", {}, function(er, resp) {
@@ -364,7 +320,7 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
         include_docs : true,
         since : since
       });
-      stream.addListener("data", handleChange);
+      stream.addListener("data", machine.handle);
     });
   };
 
