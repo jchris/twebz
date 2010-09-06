@@ -1,5 +1,7 @@
 function(userWords, e) {
-  var w, cloud = [];
+  var w, cloud = []
+    , name = e.data.args[1].screen_name.toLowerCase()
+    ;
   for (var i=0; i < userWords.length; i++) {
     w = userWords[i];
     if (w.weight >= 2.718) {
@@ -11,6 +13,7 @@ function(userWords, e) {
     }
   };
   return {
+    name : name,
     cloud : cloud
   };
 };

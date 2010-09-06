@@ -48,7 +48,13 @@ $.linkify = function(body) {
 
 $.fn.prettyDate = function() {
   $(this).each(function() {
-    $(this).text($.prettyDate($(this).text()));    
+    var string, title = $(this).attr("title");
+    if (title) {
+      string = $.prettyDate(title);
+    } else {
+      string = $.prettyDate($(this).text());
+    }
+    $(this).text(string);
   });
 };
 

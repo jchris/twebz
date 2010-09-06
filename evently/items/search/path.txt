@@ -1,1 +1,2 @@
+/search/:screen_name/:term
 /search/:term

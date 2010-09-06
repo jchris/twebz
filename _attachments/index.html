@@ -28,6 +28,9 @@
       $("#items").evently("items", app);
       $("#wordcloud").evently("wordcloud", app);
       $.pathbinder.begin("/");
+      setInterval(function() {
+        $(".date").prettyDate();
+      }, 60 * 1000);
     });
   </script>
 </html>

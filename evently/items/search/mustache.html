@@ -1,3 +1,6 @@
-<h3>Tweets containing {{term}}</h3>
-<a href="#more">Load more</a>
+<h3>Tweets containing {{term}}{{#screen_name}} by {{screen_name}}{{/screen_name}}</h3>
+{{#screen_name}}
+<h4><a href="#/search/{{term}}">Click here to see them from everyone.</a></h4>
+{{/screen_name}}
+<a href="#more">Load recent uses of {{term}} across Twitter.</a>
 <ul></ul>
