@@ -3,7 +3,7 @@ function(resp) {
     twebz = app.require("lib/twebz");
   return {
     tweets : resp.rows.map(function(r) {
-      return twebz.tweetli(r.doc);
+      return twebz.tweetli(r.doc || r.value);
     })
   }
 };
