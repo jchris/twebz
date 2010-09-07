@@ -74,10 +74,20 @@ div.twbody {
   width:90%;
 }
 
-div.twbody .date {
+div.twbody .ctrl {
   float:right;
   font-size:80%;
   color:#bbb;
+  text-align:right;
+}
+
+div.twbody .ctrl a {
+  color:#bbb;
+  text-decoration:none;
+}
+
+div.twbody .ctrl a:hover {
+  color:#00e;
 }
 
 div.twbody p {

@@ -222,6 +222,28 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
     }
   }
 
+  function sendRetweet(doc) {
+    // first check the hmac
+    var udb = client.db(twebz.user_db(doc.twebz.couch_user));
+    udb.getDoc(twebz.secret_docid, function(er, secret) {
+      if (ok(er, doc)) {
+        var key = secret.token;
+        if (validSignature(key, doc)) {
+          twitterConnection(doc.twebz.couch_user, 
+            doc.twebz.twitter_acct, {}, function(tc) {
+              tc.retweet(doc.twebz.id, function(er, resp) {
+                if (ok(er, doc)) {
+                  log("sent retweet for "+doc.twebz.twitter_acct+": "+doc.twebz.id);
+                  doc.twebz.state = 'sent';
+                  db.saveDoc(doc);
+                }                
+              });
+            });
+          }
+        }
+    });
+  };
+
   function sendTweet(doc) {
     // first check the hmac
     var udb = client.db(twebz.user_db(doc.twebz.profile.name));
@@ -364,6 +386,9 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
     },
     tweet : {
       unsent : sendTweet
+    },
+    retweet : {
+      unsent : sendRetweet
     },
     "user-recent" : {
       request : requestRecentTweets

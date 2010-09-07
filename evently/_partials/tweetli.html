@@ -1,11 +1,15 @@
-<li>
+<li data-id="{{_id}}">
   <div class="avatar">
     {{#image_url}}
       <a href="#/user/{{name}}"><img src="{{image_url}}" alt="{{name}}"/></a>
     {{/image_url}}
   </div>
 <div class="twbody">
-  <span class="date" title="{{created_at}}">{{pretty_date}}</span>
+  <div class="ctrl">
+    <span class="date" title="{{created_at}}">{{pretty_date}}</span>
+    <br/>
+    <a title="reply" href="#reply">&#8617;</a> <a title="retweet" href="#rt">&#x267B;</a>
+  </div>
   <div class="name">
     <a href="#/user/{{name}}">{{nickname}}</a>
   </div>
