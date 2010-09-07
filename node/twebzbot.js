@@ -247,13 +247,17 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
   function sendTweet(doc) {
     // first check the hmac
     var udb = client.db(twebz.user_db(doc.twebz.profile.name));
+    var params = {annotations: [{twebz : {id : doc._id}}]};
+    if (doc.in_reply_to_status_id) {
+      params.in_reply_to_status_id = doc.in_reply_to_status_id;
+    }
     udb.getDoc(twebz.secret_docid, function(er, secret) {
       if (ok(er, doc)) {
         var key = secret.token;
         if (validSignature(key, doc)) {
           twitterConnection(doc.twebz.profile.name, 
             doc.user.id, {}, function(tc) {
-              tc.updateStatus(doc.text, [{twebz : {id : doc._id}}], 
+              tc.updateStatus(doc.text, params, 
                 function(er, resp) {
                   if (ok(er, doc)) {
                     log("sent tweet for "+doc.user.screen_name+": "+doc.text);

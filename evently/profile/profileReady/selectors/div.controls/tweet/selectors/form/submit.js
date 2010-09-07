@@ -18,6 +18,9 @@ function(e) {
         }
       }
     ;
+  if (f.in_reply_to_status_id) {
+    tweet.in_reply_to_status_id = f.in_reply_to_status_id;
+  }
   udb.openDoc(twebz.secret_docid, {
     success : function(doc) {
       var key = doc.token;
@@ -39,8 +42,6 @@ function(e) {
         }
       });
     }
-  })
-  
-
+  });
   return false;
 };
