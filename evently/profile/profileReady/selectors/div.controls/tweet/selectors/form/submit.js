@@ -37,6 +37,7 @@ function(e) {
           app.db.saveDoc(tweet, {
             success : function() {
               widget[0].reset();
+              $('[name=in_reply_to_status_id]').val("");
             }
           });
         }
