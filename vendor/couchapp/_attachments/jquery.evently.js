@@ -127,14 +127,15 @@ function $$(node) {
     }
     events = applyCommon(events);
     $$(elem).evently = events;
-    $$(elem).partials = extractPartials(app.ddoc);
+    if (app && app.ddoc) {
+      $$(elem).partials = extractPartials(app.ddoc);
+    }
     // setup the handlers onto elem
     forIn(events, function(name, h) {
       eventlyHandler(elem, name, h, args);
     });
     
     if (events._init) {
-      // $.log("ev _init", elem);
       elem.trigger("_init", args);
     }
     
@@ -150,6 +151,11 @@ function $$(node) {
   // eventlyHandler applies the user's handler (h) to the 
   // elem, bound to trigger based on name.
   function eventlyHandler(elem, name, h, args) {
+    if ($.evently.log) {
+      elem.bind(name, function() {
+        $.log(elem, name);
+      });
+    }
     if (h.path) {
       elem.pathbinder(name, h.path);
     }
@@ -169,7 +175,7 @@ function $$(node) {
     } else {
       // an object is using the evently / mustache template system
       if (h.fun) {
-        elem.bind(name, {args:args}, funViaString(h.fun, name));
+        throw("e.fun has been removed, please rename to e.before")
       }
       // templates, selectors, etc are intepreted
       // when our named event is triggered.
