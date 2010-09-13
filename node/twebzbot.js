@@ -213,27 +213,32 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
     });
   }
 
+  function tweetStreamListeners(stream, user_id, dolog) {
+    stream.addListener("json", function(json) {
+      if (dolog) log(json);
+      if (json.friends) {
+      } else {
+        if (json.id) {
+          json._id = ""+json.id; //avoid duplicates
+        }
+        db.saveDoc(json);
+      }
+    });
+    stream.addListener("error", function(er) {
+      log("error streaming for acct "+ user_id);
+      log(er)
+    });
+    stream.addListener("end", function() {
+      log("end streaming for acct "+ user_id);
+      log(arguments)
+    });
+  };
+
   function streamTweets(couch_user, user_id) {
     log("streamTweets for " + couch_user + " on twitter acct " + user_id);
     twitterConnection(couch_user, user_id, {}, function(tc) {
       var stream = tc.userStream();
-      stream.addListener("json", function(json) {
-        if (json.friends) {
-        } else {
-          if (json.id) {
-            json._id = ""+json.id; //avoid duplicates
-          }
-          db.saveDoc(json);
-        }
-      });
-      stream.addListener("error", function(er) {
-        log("error streaming for acct "+ user_id);
-        log(er)
-      });
-      stream.addListener("end", function() {
-        log(arguments)
-        log("end streaming for acct "+ user_id);
-      });
+      tweetStreamListeners(stream, user_id);
     });
   };
 
@@ -480,9 +485,36 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
       if (!er) {
         resp.rows.forEach(function(row) {
           if (row.value.twitter_user) {
-            streamTweets(row.value.couch_user, row.value.twitter_user.user_id);            
+            streamTweets(row.value.couch_user, row.value.twitter_user.user_id);
           }
         });
+        var acct = resp.rows[0].value;
+        startSearchStream(acct.couch_user, acct.twitter_user.user_id);
+      }
+    });
+  }
+
+  function startSearchStream(couch_user, user_id) {
+    db.view("twebz", "searches", {}, function(er, view) {
+      var terms = [];
+      if (!er) {
+        view.rows.forEach(function(row) {
+          row.value.searchTerms.forEach(function(t) {
+            t = t.toLowerCase();
+            if (terms.indexOf(t) == -1) {
+              terms.push(t);
+            }
+          })
+        });
+        twitterConnection(couch_user, user_id, {}, function(tc) {
+          log("stream search for " + couch_user + " on twitter acct " + user_id);
+          log(terms.join(','))
+          // http://stream.twitter.com/statuses/filter.json
+          var stream = tc.filterStream({track:terms.join(',')});
+          tweetStreamListeners(stream, "search "+user_id);
+        });
+      } else {
+        log("error streaming tweets")
       }
     });
   }
