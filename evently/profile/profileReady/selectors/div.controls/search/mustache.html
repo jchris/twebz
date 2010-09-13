@@ -1,14 +1,4 @@
-<div>
-  {{#users}}
-    <h4>Searches for {{name}}</h4>
-      {{#terms}}
-      <a href="#/search/{{term}}">{{term}}</a>
-      {{/terms}}
-  {{/users}}
+<h4>Accounts:</h4>
+{{#accts}}<a href="#/settings/search/{{user_id}}">{{screen_name}}</a> {{/accts}}
+<div class="settings">
 </div>
-
-
-<form>
-  <label>Search terms (comma separated): <input type="text" size=80 name="track" value="{{track}}"></label>
-  <input type="submit" value="Track Terms">
-</form>

@@ -26,11 +26,10 @@ function(cb) {
         });
         $$("#profile").requestedSearches = true;
       }
-      cb(accts);
-      // app.db.view("twebz/searches", {
-      //   keys : accts.map(function(acct) {return acct.user_id}),
-      //   success : cb
-      // });
+      app.db.view("twebz/searches", {
+        keys : accts.map(function(acct) {return acct.user_id}),
+        success : cb
+      });
     }
   });
 

@@ -1,0 +1,1 @@
+/settings/search/:user_id
