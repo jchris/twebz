@@ -1,5 +1,6 @@
 function(tweet) {
   if (tweet.id && tweet.text) {
+    var date = new Date(tweet.created_at);
     var wordCounts = {};
     var words = tweet.text.toLowerCase().split(/\s/);
     words.forEach(function(word) {
@@ -11,7 +12,7 @@ function(tweet) {
     });
     for (var w in wordCounts) {
       if (wordCounts.hasOwnProperty(w))
-        emit([w, new Date(tweet.created_at)], 1);
+        emit([w, date], 1);
     }
   }
 };

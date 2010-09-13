@@ -8,7 +8,7 @@ function(cb, e, params) {
     app.view("userWordCount",{
       startkey : [name],
       endkey : [name, {}],
-      group : true,
+      group_level : 2,
       success : function(view) {
         var userWords = cloud.userCount(view, gWC);
         cb(userWords);
