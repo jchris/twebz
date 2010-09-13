@@ -3,6 +3,10 @@
     {{#image_url}}
       <a href="#/user/{{name}}"><img src="{{image_url}}" alt="{{name}}"/></a>
     {{/image_url}}
+    {{#rt}}
+    <br/>
+      <a href="#/user/{{name}}"><img src="{{image_url}}" alt="{{name}}"/></a>
+    {{/rt}}
   </div>
 <div class="twbody">
   <div class="ctrl">
@@ -12,6 +16,9 @@
   </div>
   <div class="name">
     <a href="#/user/{{name}}" title="{{name}}">{{nickname}}</a>
+    {{#rt}}
+      &#x267B; by <a href="#/user/{{name}}" title="{{name}}">{{nickname}}</a>
+    {{/rt}}
   </div>
   <p>{{{message}}}</p>
 </div>  
