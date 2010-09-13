@@ -128,6 +128,40 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
       });
   }
   
+  function requestSavedSearches(doc) {
+    var acct;
+    doc.twebz.twitter_accts.forEach(function(acct) {
+      var docid = "saved-searches-"+acct.user_id;
+      twitterConnection(doc.twebz.couch_user, 
+        acct.user_id, {},
+        function(tc) {
+          tc.savedSearches(function(er, resp) {
+            if (ok(er, doc)) {
+              db.getDoc(docid, function(er, odoc) {
+                var sdoc = {
+                  _id : docid,
+                  twebz : {
+                    type : "saved-searches",
+                    state : "results",
+                    acct : acct
+                  },
+                  searches : resp
+                }
+                if (odoc) {
+                  sdoc._rev = odoc._rev;
+                }
+                db.saveDoc(sdoc, function(er, resp) {
+                  if (ok(er, doc)) {
+                    doc.twebz.state = "fetched";
+                    db.saveDoc(doc);
+                  }
+                });
+              });
+            }
+          });
+        });
+    });
+  }
 
   function requestRecentTweets(doc) {
     twitterConnection(doc.twebz.couch_user, 
@@ -403,6 +437,9 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
     },
     "search-recent" : {
       request : requestSearch
+    },
+    "saved-searches" : {
+      request : requestSavedSearches
     },
     _default : function(doc) {
       log("unhandled change");
