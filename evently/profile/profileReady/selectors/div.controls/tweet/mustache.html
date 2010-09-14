@@ -1,5 +1,5 @@
 <h3>Tweet here</h3>
-<form>
+<form class="tweet">
   <label>New Tweet: <input type="text" name="status" size=80></label>
   <select name="account">
     {{#twitter_accounts}}
@@ -8,4 +8,9 @@
   </select>
   <input type="hidden" name="in_reply_to_status_id">
   <input type="submit" value="Post"><span class="chars"></span>
+</form>
+<form class="search">
+  <label>Search: <input type="text" name="search" size=20></label>
+  <input type="submit" value="Search">
+  <span class="matches"></span>
 </form>
