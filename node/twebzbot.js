@@ -200,7 +200,9 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
     udb.view("twebz-private", "twitter-accts", {
       key : parseInt(user_id)
     }, function(er, resp) {
-      if (resp.rows[0]) {
+      if (er) {
+        log("no private database for "+couch_user);
+      } else if (resp.rows[0]) {
         var v = resp.rows[0].value
           , tc = tweasy.init(twitter_oauth, {
             access_token : v.oauth_access_token,
