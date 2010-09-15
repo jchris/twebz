@@ -11,7 +11,7 @@ function() {
   function setupComplete() {
     app.db.openDoc(docid, {
       success : function(doc) {
-        doc.state = "setup-complete";
+        doc.twebz.state = "setup-complete";
         app.db.saveDoc(doc, {
           success : function() {
             widget.trigger("_init");

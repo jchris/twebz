@@ -1,5 +1,5 @@
 function(doc) {
-  if (doc.type =="user-setup") {
-    emit(doc.state, doc.username);
+  if (doc.twebz && doc.twebz.type =="user-setup") {
+    emit(doc.twebz.state, doc.username);
   }
 };

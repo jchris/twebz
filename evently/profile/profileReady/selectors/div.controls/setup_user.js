@@ -1,4 +1,4 @@
-function() {
+function(e, redo) {
   var widget = $(this)
     , app = $$(widget).app
     , userCtx = $$("#account").userCtx
@@ -8,10 +8,11 @@ function() {
   function requestUserSetup(userSetupDoc) {
     userSetupDoc = userSetupDoc || {
       _id : userDocid,
-      username : userCtx.name,
-      type : "user-setup"
+      username : userCtx.name
     };
-    userSetupDoc.state = "setup-requested";
+    userSetupDoc.twebz = userSetupDoc.twebz || {};
+    userSetupDoc.twebz.type = "user-setup";
+    userSetupDoc.twebz.state = "setup-requested";
     app.db.saveDoc(userSetupDoc, {
       success : function() {
         if (userCtx.roles.indexOf("_admin") != -1) {
@@ -24,7 +25,7 @@ function() {
   }
   app.db.openDoc(userDocid, {
     success : function(doc) {
-      if (doc.state == "setup-complete") {
+      if (!redo && doc.twebz && doc.twebz.state == "setup-complete") {
         widget.trigger("tweet");
       } else {
         requestUserSetup(doc);      

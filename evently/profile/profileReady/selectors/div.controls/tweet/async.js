@@ -6,6 +6,9 @@ function(cb) {
   , udb = $.couch.db(twebz.user_db(userCtx.name))
   ;
   udb.view("twebz-private/twitter-accts", {
-    success : cb
+    success : cb,
+    error : function() {
+      $(widget).trigger("setup_user", [true]);
+    }
   });
 };

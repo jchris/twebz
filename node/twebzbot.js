@@ -21,11 +21,17 @@ var config = JSON.parse(fs.readFileSync(path.join(__dirname, 'config.json')))
   , dburl = url.parse(config.db)
   , dbname = dburl.pathname.split('/')[1]
   , twebz = require('../lib/twebz').init(dbname)
+  , admin_client
   , client = couchdb.createClient(dburl.port, dburl.hostname, 
       twebz.app_user, config.passcode)
   , db = client.db(dbname)
   , config_db = client.db(twebz.config_db)
   ;
+
+if (config.admin_pass && config.admin_user) {
+  admin_client = couchdb.createClient(dburl.port, dburl.hostname, 
+      config.admin_user, config.admin_pass);
+}
 
 config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
   var twitter_oauth;
@@ -313,6 +319,20 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
     });
   }
 
+  function setupUser(doc) {
+    if (admin_client) {
+      // check to see if the user exists
+      // create the database for the user
+      // set the access so only the user can access it
+      // create the secret doc
+      // set the doc to setup complete
+      log("you have an admin client")
+    } else {
+      log("add admin_user and admin_pass to the config and twebz will setup users for you");
+    }
+  }
+  
+
   function getProfileInfo(doc) {
     if (doc.twebz.couch_user && doc.twebz.twitter_user && 
       doc.twebz.twitter_user.user_id) {
@@ -434,6 +454,9 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
     },
     retweet : {
       unsent : sendRetweet
+    },
+    "user-setup" : {
+      "setup-requested" : setupUser
     },
     "user-recent" : {
       request : requestRecentTweets
