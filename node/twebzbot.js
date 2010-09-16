@@ -189,6 +189,11 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
                 })
               }, function(er, resp) {
                 if (ok(er, doc)) {
+                  resp.forEach(function(r) {
+                    if (r.error && r.error != "conflict") {
+                      log(r);
+                    }
+                  });
                   if (tweets.length > 0) {
                     doc.twebz.tweet_range = {
                       start : tweets[tweets.length -1].id,
