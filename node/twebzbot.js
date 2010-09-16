@@ -225,7 +225,7 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
     });
   }
 
-  function tweetStreamListeners(stream, user_id, dolog) {
+  function tweetStreamListeners(stream, restartFun, restartArgs) {
     stream.addListener("json", function(json) {
       if (dolog) {log(json);}
       if (json.friends) {
@@ -237,12 +237,19 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
       }
     });
     stream.addListener("error", function(er) {
-      log("error streaming for acct "+ user_id);
+      log("error streaming ", restartArgs);
       log(er)
+      setTimeout(function() {
+        log("restart stream  ", restartArgs);
+        restartFun.apply(null, restartArgs);
+      }, 1000);
     });
     stream.addListener("end", function() {
-      log("end streaming for acct "+ user_id);
-      log(arguments)
+      log("end streaming ", restartArgs);
+      setTimeout(function() {
+        log("restart stream ", restartArgs);
+        restartFun.apply(null, restartArgs);
+      }, 1000);
     });
   };
 
@@ -250,7 +257,7 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
     log("streamTweets for " + couch_user + " on twitter acct " + user_id);
     twitterConnection(couch_user, user_id, {}, function(tc) {
       var stream = tc.userStream();
-      tweetStreamListeners(stream, user_id);
+      tweetStreamListeners(stream, streamTweets, [couch_user, user_id]);
     });
   };
 
@@ -519,7 +526,8 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
     link_account : {
       request : requestToken,
       launched : requestTokenVerified,
-      connected : getProfileInfo
+      connected : getProfileInfo,
+      complete : startUserStreaming
     },
     tweet : {
       unsent : sendTweet
@@ -574,19 +582,30 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
     });
   };
 
+  function startUserStreaming(doc) {
+    if (doc.twebz.couch_user && doc.twebz.twitter_user && 
+      doc.twebz.twitter_user.user_id) {
+        streamTweets(doc.twebz.couch_user, doc.twebz.twitter_user.user_id);
+    }
+  }
+
   function startUserStreams() {
     db.view("twebz","account-links", {
       startkey : ["complete"],
       endkey : ["complete",{}]
     }, function(er, resp) {
       if (!er) {
-        resp.rows.forEach(function(row) {
-          if (row.value.twitter_user) {
-            streamTweets(row.value.couch_user, row.value.twitter_user.user_id);
-          }
-        });
-        var acct = resp.rows[0].value;
-        startSearchStream(acct.couch_user, acct.twitter_user.user_id);
+        if (resp.rows.length > 0) {
+          resp.rows.forEach(function(row) {
+            if (row.value.twitter_user) {
+              streamTweets(row.value.couch_user, row.value.twitter_user.user_id);
+            }
+          });
+          var acct = resp.rows[0].value;
+          startSearchStream(acct.couch_user, acct.twitter_user.user_id);
+        } else {
+          log("no users signed up yet");
+        }
       }
     });
   }
@@ -606,9 +625,8 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
         twitterConnection(couch_user, user_id, {}, function(tc) {
           log("stream search for " + couch_user + " on twitter acct " + user_id);
           log(terms.join(','))
-          // http://stream.twitter.com/statuses/filter.json
           var stream = tc.filterStream({track:terms.join(',')});
-          tweetStreamListeners(stream, "search "+user_id);
+          tweetStreamListeners(stream, startSearchStream, [couch_user, user_id]);
         });
       } else {
         log("error streaming tweets")
