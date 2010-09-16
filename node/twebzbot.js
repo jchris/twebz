@@ -10,12 +10,11 @@ var tweetstream = require('tweetstream')
   , stately = require("stately")
   , OAuth= require("oauth").OAuth
   , jsond = require("../lib/jsond")
+  , security = require("../lib/security")
   , sha1 = require("../lib/sha1")
   ;
 
-function log(e) {
-  sys.puts(sys.inspect(e));
-};
+var log = console.log;
 
 var config = JSON.parse(fs.readFileSync(path.join(__dirname, 'config.json')))
   , dburl = url.parse(config.db)
@@ -48,13 +47,18 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
       "1.0", null, "HMAC-SHA1");
   }
   
-  function ok(er, doc, couch) {
+  function ok(er, doc, note, couch) {
     couch = couch || db; // default to db from closure
     if (er) {
       // log(['error', doc._id, er]);
       doc.twebz = doc.twebz || {};
       doc.twebz.state = "error";
       doc.twebz.error = er;
+      if (note) {
+        doc.twebz.error_note = note;
+      } else {
+        delete doc.twebz.error_note;
+      }
       couch.saveDoc(doc);
       return false
     } else {
@@ -223,7 +227,7 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
 
   function tweetStreamListeners(stream, user_id, dolog) {
     stream.addListener("json", function(json) {
-      if (dolog) log(json);
+      if (dolog) {log(json);}
       if (json.friends) {
       } else {
         if (json.id) {
@@ -319,14 +323,82 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
     });
   }
 
+  function setUserAccess(udb, username, cb) {
+    udb.getDoc("_security", function(er, secObj) {
+      if (er) {
+        log(er)
+      } else {
+        secObj = security.applyReaders(secObj, [username, twebz.app_user]);
+        udb.saveDoc("_security", secObj, cb);
+      }
+    });
+  };
+
+  var ddoc = null;
+  function withTwebzDDoc(fun) {
+    if (ddoc) {
+      fun(ddoc);
+    } else {
+      db.getDoc("_design/twebz", function(er, doc) {
+        if (er) {
+          console.log(er)
+        } else {
+          ddoc = doc;
+          fun(ddoc);
+        }
+      });
+    }
+  }
+  
+
+
   function setupUser(doc) {
     if (admin_client) {
+      var udb = client.db(twebz.user_db(doc.username))
+        , admin_udb = admin_client.db(twebz.user_db(doc.username));
       // check to see if the user exists
-      // create the database for the user
-      // set the access so only the user can access it
-      // create the secret doc
-      // set the doc to setup complete
-      log("you have an admin client")
+      admin_client.request({
+        path : "/_session"
+      }, function(er, resp) {
+        admin_client.db(resp.info.authentication_db)
+          .getDoc("org.couchdb.user:"+doc.username, function(er,user) {
+            if (ok(er, doc, "no such user")) {
+              // create the database for the user
+              admin_udb.create(function(er) {
+                if ((er && er.error == "file_exists") || ok(er, doc, "create user db "+doc.username)) {
+                  // set the access so only the user can access it
+                  setUserAccess(admin_udb, doc.username, function(er) {
+                    if (ok(er, doc, "setUserAccess")) {
+                      withTwebzDDoc(function(ddoc) {
+                        // create the design doc for the private db
+                        admin_udb.saveDoc({
+                          _id : "_design/twebz-private",
+                          views : ddoc["private"].views
+                        }, function(er) {
+                          if ((er && er.error == "conflict") || ok(er, doc, "make private ddoc")) {
+                            // create the secret doc
+                            admin_client.uuids(1, function(er, resp) {
+                              udb.saveDoc({
+                                _id : twebz.secret_docid,
+                                token : twebz.randomToken(resp.uuids[0])
+                              }, function(er) {
+                                if ((er && er.error == "conflict") || ok(er, doc, "secret doc")) {
+                                  // set the doc to setup complete
+                                  doc.twebz.state = "setup-complete";
+                                  db.saveDoc(doc);
+                                }
+                              });
+                            });
+                          }
+                        });
+                      });
+                    }
+                  });
+                }
+              });
+            }
+          });
+      });
     } else {
       log("add admin_user and admin_pass to the config and twebz will setup users for you");
     }
