@@ -78,7 +78,7 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
               var tweets = search.results;
               db.bulkDocs({
                 docs : tweets.map(function(t) {
-                  t._id = ""+t.id;
+                  t._id = "twitter-"+t.id;
                   t.user = {
                     screen_name : t.from_user,
                     profile_image_url : t.profile_image_url
@@ -119,7 +119,7 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
               if (ok(er, doc)) {
                 db.bulkDocs({
                   docs : tweets.map(function(t) {
-                    t._id = ""+t.id;
+                    t._id = "twitter-"+t.id;
                     return t;
                   })
                 }, function(er, resp) {
@@ -184,7 +184,7 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
             if (ok(er, doc)) {
               db.bulkDocs({
                 docs : tweets.map(function(t) {
-                  t._id = ""+t.id;
+                  t._id = "twitter-"+t.id;
                   return t;
                 })
               }, function(er, resp) {
@@ -227,11 +227,10 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
 
   function tweetStreamListeners(stream, restartFun, restartArgs) {
     stream.addListener("json", function(json) {
-      if (dolog) {log(json);}
       if (json.friends) {
       } else {
         if (json.id) {
-          json._id = ""+json.id; //avoid duplicates
+          json._id = "twitter-"+json.id; //avoid duplicates
         }
         db.saveDoc(json);
       }
@@ -622,12 +621,14 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
             }
           })
         });
-        twitterConnection(couch_user, user_id, {}, function(tc) {
-          log("stream search for " + couch_user + " on twitter acct " + user_id);
-          log(terms.join(','))
-          var stream = tc.filterStream({track:terms.join(',')});
-          tweetStreamListeners(stream, startSearchStream, [couch_user, user_id]);
-        });
+        if (terms.length > 0) {
+          twitterConnection(couch_user, user_id, {}, function(tc) {
+            log("stream search for " + couch_user + " on twitter acct " + user_id);
+            log(terms.join(','))
+            var stream = tc.filterStream({track:terms.join(',')});
+            tweetStreamListeners(stream, startSearchStream, [couch_user, user_id]);
+          });
+        }
       } else {
         log("error streaming tweets")
       }
