@@ -561,11 +561,16 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
 
   // listen for _changes on twebz db
   function getSince(cb) {
-    db.view("twebz","seq", {}, function(er, resp) {
-      if (resp.rows.length > 0) {
-        cb(resp.rows[0].value.max);
+    db.view("twebz","seq", {random : Math.random()}, function(er, resp) {
+      if (er) {
+        log("getSince")
+        log(er)
       } else {
-        cb(0);
+        if (resp.rows && resp.rows.length > 0) {
+          cb(resp.rows[0].value.max);
+        } else {
+          cb(0);
+        }
       }
     });
   };
