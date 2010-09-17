@@ -1,4 +1,4 @@
-<li data-id="{{_id}}">
+<li data-id="{{_id}}" data-twitterid="{{twitterid}}">
   <div class="avatar">
     {{#image_url}}
       <a href="#/user/{{name}}"><img src="{{image_url}}" alt="{{name}}"/></a>
@@ -10,7 +10,7 @@
   </div>
 <div class="twbody">
   <div class="ctrl">
-    <span class="date" title="{{created_at}}">{{pretty_date}}</span>
+    <a href="/twebz/{{_id}}"><span class="date" title="{{created_at}}">{{pretty_date}}</span></a>
     <br/>
     <a title="reply" href="#reply">&#8617;</a> <a title="retweet" href="#rt">&#x267B;</a>
   </div>
