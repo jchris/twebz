@@ -514,12 +514,39 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
       }
     });
   }
+  var oldHighSeq = 0, highSeq = 0;
+  setInterval(function() {
+    if (oldHighSeq != highSeq) {
+      db.getDoc("_local/twebz-seq", function(er, doc) {
+        if (doc) {
+          doc.seq = highSeq;
+          db.saveDoc(doc, function(er) {
+            if (!er) {
+              oldHighSeq = highSeq
+            }
+          });
+        } else {
+          db.saveDoc("_local/twebz-seq", {
+            seq : highSeq
+          }, function(er) {
+            if (!er) {
+              oldHighSeq = highSeq
+            }
+          });
+        }
+      });
+    }
+  }, 5000);
 
   var machine = stately.define({
     _before : function(change, cb) {
-      change.doc.twebz.seq = change.seq;
-      log("doc: "+change.doc._id+ " state: "+change.doc.twebz.state);
-      cb(change.doc);
+      highSeq = change.seq;
+      // log("chnage"+change.seq)
+      if (change.doc.twebz) {
+        // change.doc.twebz.seq = change.seq;
+        log("doc: "+change.doc._id+ " state: "+change.doc.twebz.state);
+        cb(change.doc);
+      }
     },
     _getState : function(doc, cb) {
       cb(doc.twebz.state);
@@ -566,22 +593,30 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
 
   // listen for _changes on twebz db
   function getSince(cb) {
-    db.view("twebz","seq", {random : Math.random()}, function(er, resp) {
-      if (er) {
-        log("getSince")
-        log(er)
+    db.getDoc("_local/twebz-seq", function(er, doc) {
+      if (doc) {
+        cb(doc.seq);
       } else {
-        if (resp.rows && resp.rows.length > 0) {
-          cb(resp.rows[0].value.max);
-        } else {
-          cb(0);
-        }
+        cb(0);
       }
     });
+    // db.view("twebz","seq", {random : Math.random()}, function(er, resp) {
+    //   if (er) {
+    //     log("getSince")
+    //     log(er)
+    //   } else {
+    //     if (resp.rows && resp.rows.length > 0) {
+    //       cb(resp.rows[0].value.max);
+    //     } else {
+    //       cb(0);
+    //     }
+    //   }
+    // });
   };
 
   function workFromChanges() {
     getSince(function(since) {
+      log("starting changes at "+since);
       var stream = db.changesStream({
         filter : "twebz/twebz",
         include_docs : true,
@@ -611,7 +646,9 @@ config_db.getDoc(twebz.twitter_keys_docid, function(er, doc) {
             }
           });
           var acct = resp.rows[0].value;
-          startSearchStream(acct.couch_user, acct.twitter_user.user_id);
+          if (acct.couch_user && acct.twitter_user && acct.twitter_user.user_id) {
+            startSearchStream(acct.couch_user, acct.twitter_user.user_id);
+          }
         } else {
           log("no users signed up yet");
         }

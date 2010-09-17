@@ -6,7 +6,7 @@ function() {
     , sha1 = app.require("lib/sha1")
     , udb = $.couch.db(twebz.user_db($$("#account").userCtx.name))
     , li = $(a).parents("li")
-    , id = li.attr("data-id")
+    , id = li.attr("data-twitterid")
     , twt = $.cookie("twitter_name")
     , txt = $(".twbody p", li).text()
     , message = 'Retweet "'+txt+'" as '+twt+'?'
